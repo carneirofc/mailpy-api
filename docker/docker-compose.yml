@@ -3,7 +3,7 @@ services:
   mailpy-api:
     image: node:12.19.0-stretch
     working_dir: /app
-    command: sleep infinity
+    command: npm start
     network_mode: host
     environment:
       MONGODB_URI: mongodb://localhost:27017/mailpy-db
