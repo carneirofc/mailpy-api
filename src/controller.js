@@ -15,6 +15,12 @@ class MailpyController {
   async getProtected(req, res, next) {
     return res.json(topSecret);
   }
+
+  async getGroups(req, res, next) {
+    const data = await groupsCollection.find({});
+    return res.json(data);
+  }
+
   async getGroup(req, res, next) {
     return res.send("Not impplemented");
   }

@@ -8,7 +8,7 @@ module.exports = {
     identityMetadata:
       "https://login.microsoftonline.com/CNPEMCAMP.onmicrosoft.com/v2.0/.well-known/openid-configuration",
     isB2C: false,
-    validateIssuer: false,
+    validateIssuer: true,
     passReqToCallback: false,
     loggingLevel: "info",
     issuer: null /* Required if you are using common endpoint and setting `validateIssuer` to true.*/,
