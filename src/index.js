@@ -1,21 +1,17 @@
-//const path = require('path');
 require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
-//const helmet = require("helmet");
+const helmet = require("helmet");
 const morgan = require("morgan");
 //const yup = require('yup');
 //const rateLimit = require('express-rate-limit');
 //const slowDown = require('express-slow-down');
 
 const passport = require("passport");
-const BearerStrategy = require("passport-azure-ad").BearerStrategy;
+const passportAzureAD = require("passport-azure-ad");
 
 const config = require("./config");
 const controller = require("./controller");
-
-const HOST = process.env.HOST || "0.0.0.0";
-const PORT = process.env.PORT || 1337;
 
 const app = express();
 
@@ -23,27 +19,26 @@ const app = express();
 // haproxy or Apache mod proxy or nginx configured as proxy or others.
 // The proxy server should insert the ip address of the remote client
 // through request header 'X-Forwarded-For' as 'X-Forwarded-For: some.client.ip.address'
-//app.enable("trust proxy"); //, '127.0.0.1');
+app.enable("trust proxy"); //, '127.0.0.1');
 
 app.use(cors());
-//app.use(helmet());
+app.use(helmet());
 app.use(morgan("dev")); // Request Logger
-//app.use(express.json());
+app.use(express.json());
 app.use(passport.initialize());
 
 const options = {
-  audience: config.options.audience,
-  clientID: config.credentials.clientID,
-  identityMetadata: config.identityMetadata,
-  isB2C: config.settings.isB2C,
-  issuer: config.settings.issuer,
-  loggingLevel: config.settings.loggingLevel,
-  passReqToCallback: config.settings.passReqToCallback,
-  policyName: config.policies.policyName,
-  validateIssuer: config.settings.validateIssuer,
+  audience: config.msal.audience,
+  clientID: config.msal.clientID,
+  identityMetadata: config.msal.identityMetadata,
+  isB2C: config.msal.isB2C,
+  issuer: config.msal.issuer,
+  loggingLevel: config.msal.loggingLevel,
+  passReqToCallback: config.msal.passReqToCallback,
+  validateIssuer: config.msal.validateIssuer,
 };
 
-const bearerStrategy = new BearerStrategy(options, function (token, done) {
+const bearerStrategy = new passportAzureAD.BearerStrategy(options, function (token, done) {
   console.info(token, "was the token retreived");
   if (!token.oid) done(new Error("oid is not found in token"));
   else {
@@ -52,17 +47,9 @@ const bearerStrategy = new BearerStrategy(options, function (token, done) {
   }
 });
 passport.use(bearerStrategy);
-/*app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Authorization, Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});*/
 
 app.get(
-  "/mailpy/api/hello",
+  "/mailpy/api/protected",
   passport.authenticate("oauth-bearer", { session: false }),
   (req, res) => {
     console.log("Validated claims: ", req.authInfo);
@@ -113,7 +100,6 @@ app.use((req, res) => {
 });
 
 app.use((error, req, res, next) => {
-  console.log("Use", error, req, res);
   if (error.status) {
     res.status(error.status);
   } else {
@@ -121,10 +107,10 @@ app.use((error, req, res, next) => {
   }
   res.json({
     message: error.message,
-    stack: error.stack,
+    stack: process.env.NODE_ENV === "production" ? "Something wrong happened" : error.stack,
   });
 });
 
-app.listen(PORT, HOST, () => {
+app.listen(config.config.server, HOST, () => {
   console.log("Express server started on port %s at %s", PORT, HOST);
 });

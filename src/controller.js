@@ -1,6 +1,7 @@
+const config = require("./config");
 const monk = require("monk");
 
-const db = monk(process.env.MONGODB_URI || "mongodb://localhost:27017/mailpy-db");
+const db = monk(config.db.MONGODB_URI);
 const conditionsCollection = db.get("conditions");
 const entriesCollection = db.get("entries");
 const groupsCollection = db.get("groups");
@@ -14,13 +15,21 @@ class MailpyController {
   async getProtected(req, res, next) {
     return res.json(topSecret);
   }
-
-  async getGroups(req, res, next) {
-    const data = await groupsCollection.find({});
-    return res.json(data);
+  async getGroup(req, res, next) {
+    return res.send("Not impplemented");
   }
 
-  async getGroup(req, res, next) {}
+  async addGroup(req, res, next) {
+    res.send("Not impplemented");
+  }
+
+  async updateGroup(req, res, next) {
+    res.send("Not impplemented");
+  }
+
+  async removeGroup(req, res, next) {
+    res.send("Not impplemented");
+  }
 
   async getConditions(req, res, next) {
     const data = await conditionsCollection.find({});
@@ -32,7 +41,21 @@ class MailpyController {
     return res.json(data);
   }
 
-  async getEntry(req, res, next) {}
+  async getEntry(req, res, next) {
+    res.send("Not impplemented");
+  }
+
+  async addEntry(req, res, next) {
+    res.send("Not impplemented");
+  }
+
+  async updateEntry(req, res, next) {
+    res.send("Not impplemented");
+  }
+
+  async removeEntry(req, res, next) {
+    res.send("Not impplemented");
+  }
 }
 
 module.exports = new MailpyController();
