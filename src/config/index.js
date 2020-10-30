@@ -22,4 +22,7 @@ module.exports = {
   db: {
     MONGODB_URI: process.env.MONGODB_URI || "mongodb://localhost:27017/mailpy-db",
   },
+  graphConfig: {
+    graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
+  },
 };

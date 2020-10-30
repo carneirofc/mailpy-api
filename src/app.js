@@ -1,33 +1,13 @@
-//const path = require('path');
 const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const cors = require("cors");
 const passport = require("passport");
-const passportAzureAD = require("passport-azure-ad");
 
-const controller = require("./controller");
 const config = require("./config");
-
-const passportAzureOptions = {
-  audience: config.msal.audience,
-  clientID: config.msal.clientID,
-  identityMetadata: config.msal.identityMetadata,
-  isB2C: config.msal.isB2C,
-  issuer: config.msal.issuer,
-  loggingLevel: config.msal.loggingLevel,
-  passReqToCallback: config.msal.passReqToCallback,
-  validateIssuer: config.msal.validateIssuer,
-};
-
-const bearerStrategy = new passportAzureAD.BearerStrategy(passportAzureOptions, function (token, done) {
-  console.info(token, "was the token retreived");
-  if (!token.oid) done(new Error("oid is not found in token"));
-  else {
-    owner = token.oid;
-    done(null, {}, token);
-  }
-});
+const controller = require("./controller");
+const authorization = require("./controller/authorization");
+const middleware = require("./midlewares");
 
 class App {
   constructor() {
@@ -35,7 +15,6 @@ class App {
 
     this.midlewares();
     this.routes();
-    this.handlers();
   }
 
   midlewares() {
@@ -50,34 +29,15 @@ class App {
     this.app.use(morgan("common")); // Request Logger
     this.app.use(express.json());
     this.app.use(passport.initialize());
-    passport.use(bearerStrategy);
-  }
-
-  handlers() {
-    this.app.use((req, res) => {
-      res.status(404).json({
-        someBody: "Route not found or missing resource...",
-      });
-    });
-
-    this.app.use((error, req, res, next) => {
-      if (error.status) {
-        res.status(error.status);
-      } else {
-        res.status(500);
-      }
-      res.json({
-        message: error.message,
-        stack: process.env.NODE_ENV === "production" ? "Something wrong happened" : error.stack,
-      });
-    });
+    passport.use(authorization.bearerStrategy);
   }
 
   routes() {
-    this.app.get("/mailpy/api/protected", passport.authenticate("oauth-bearer", { session: false }), (req, res) => {
-      console.log("Validated claims: ", req.authInfo);
-      res.status(200).json({ name: req.authInfo["name"] });
-    });
+    this.app.get(
+      "/mailpy/api/protected",
+      passport.authenticate("oauth-bearer", { session: false }),
+      authorization.basicLoginCheck
+    );
     this.app.get("/mailpy/api/groups", controller.getGroups);
     this.app.get("/mailpy/api/group:id", controller.getGroup);
 
@@ -87,9 +47,18 @@ class App {
     this.app.get("/mailpy/api/entry:id", controller.getEntry);
 
     this.app.get("/", (req, res, next) => {
-      res.send("Mailpy - REST API");
+      res.json.send("Mailpy - REST API");
+    });
+
+    this.app.use(middleware.routeNotFound);
+    this.app.use(middleware.exceptionHappened);
+  }
+
+  listen() {
+    this.app.listen(config.server.port, config.server.port, () => {
+      console.log(`Express server started on port ${config.server.port} at ${config.server.port}`);
     });
   }
 }
 
-module.exports = new App().app;
+module.exports = new App();

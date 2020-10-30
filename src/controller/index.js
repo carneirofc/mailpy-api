@@ -1,4 +1,4 @@
-const config = require("./config");
+const config = require("../config");
 const monk = require("monk");
 
 const db = monk(config.db.MONGODB_URI);
