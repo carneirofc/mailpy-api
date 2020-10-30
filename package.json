@@ -27,6 +27,8 @@
     "monk": "^7.3.2",
     "morgan": "^1.10.0",
     "nodaemon": "0.0.5",
+    "passport": "^0.4.1",
+    "passport-azure-ad": "^4.3.0",
     "yup": "^0.29.3"
   }
 }
