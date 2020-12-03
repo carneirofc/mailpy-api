@@ -30,7 +30,7 @@ const callMSGraph = async (endpoint, bearer) => {
   console.log(endpoint, bearer);
   const options = {
     method: "GET",
-    headers: { 'Authorization': bearer },
+    headers: { Authorization: bearer },
   };
 
   console.log(`Request made to Graph API at endpoint ${endpoint}`);
