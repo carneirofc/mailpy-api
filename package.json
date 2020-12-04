@@ -31,5 +31,8 @@
     "passport": "^0.4.1",
     "passport-azure-ad": "^4.3.0",
     "yup": "^0.29.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
   }
 }

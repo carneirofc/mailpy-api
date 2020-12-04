@@ -80,6 +80,8 @@ class App {
         console.log(`Express server started at http://${config.server.host}:${config.server.port}`);
       });
     }
+    console.info("Available API endpoints");
+    this.routesList.forEach((e) => console.info(e));
   }
 }
 
