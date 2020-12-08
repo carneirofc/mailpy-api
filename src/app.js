@@ -2,14 +2,22 @@ const express = require("express");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const cors = require("cors");
-const passport = require("passport");
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
+
 const config = require("./config");
 const controller = require("./controller");
-const authorization = require("./controller/authorization");
 const middleware = require("./midlewares");
+const auth = require("./controller/auth");
+
+const passport = require("passport");
+//const createHandler = require("azure-function-express").createHandler;
+const BearerStrategy = require("passport-azure-ad").BearerStrategy;
+
+const bearerStrategy = new BearerStrategy(auth.options, (token, done) => {
+  done(null, {}, token);
+});
 
 API_ROOT = process.env.API_ROOT || "/mailpy/api";
 
@@ -27,13 +35,13 @@ class App {
          The proxy server should insert the ip address of the remote client
          through request header 'X-Forwarded-For' as 'X-Forwarded-For: some.client.ip.address' */
     this.app.enable("trust proxy");
-
     this.app.use(cors()); // CORS
     this.app.use(helmet()); // Nice to have headers
-    this.app.use(morgan("common")); // Request Logger
     this.app.use(express.json());
+    this.app.use(morgan("common")); // Request Logger
+    this.app.use(require("body-parser").urlencoded({ extended: true }));
     this.app.use(passport.initialize());
-    passport.use(authorization.bearerStrategy);
+    passport.use(bearerStrategy);
   }
 
   pushGetRoute(name, ...args) {
@@ -42,11 +50,13 @@ class App {
   }
 
   routes() {
+    //this.pushGetRoute(`${API_ROOT}/protected`, /*validateJwt,*/ acquireTokenOBO);
     this.pushGetRoute(
       `${API_ROOT}/protected`,
       passport.authenticate("oauth-bearer", { session: false }),
-      authorization.basicLoginCheck
+      auth.validateClaims
     );
+
     this.pushGetRoute(`${API_ROOT}/groups`, controller.getGroups);
     this.pushGetRoute(`${API_ROOT}/group:id`, controller.getGroup);
 
@@ -77,7 +87,9 @@ class App {
       console.error(`Failed to start https server ${e}`);
       const httpServer = http.createServer(this.app);
       httpServer.listen(config.server.port, config.server.port, () => {
-        console.log(`Express server started at http://${config.server.host}:${config.server.port}`);
+        console.warn(
+          `Express server started at http://${config.server.host}:${config.server.port}. Some functionalities may not work due to the unsecure protocol`
+        );
       });
     }
     console.info("Available API endpoints");
