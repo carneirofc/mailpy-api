@@ -31,6 +31,10 @@ const callResourceAPI = async (newTokenValue, resourceURI) => {
 };
 
 const getNewAccessToken = async (userToken) => {
+  /** The administrator consent is needed. Same problem described at:
+   * https://stackoverflow.com/questions/56266148/aad-how-do-you-send-an-interactive-authorization-request-to-resolve-aadsts650
+   * In a default environment the user would be propted at the SPA to accept and give the permission, but in our tenant it's more restrictive.
+   * */
   const [bearer, tokenValue] = userToken.split(" ");
   const tokenEndpoint = `https://${auth.authority}/${auth.tenantID}/oauth2/${auth.version}/token`;
 
@@ -61,7 +65,6 @@ const getNewAccessToken = async (userToken) => {
     .then((res) => res)
     .catch((err) => console.log(err));
   console.info("Response", json);
-  //let json = response.json();
   return json;
 };
 
