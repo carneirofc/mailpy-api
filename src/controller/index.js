@@ -1,23 +1,58 @@
+const { Logger } = require("mongodb");
 const config = require("../config");
-const monk = require("monk");
+const db = require("./db");
 
-const db = monk(config.db.MONGODB_URI);
-const conditionsCollection = db.get("conditions");
-const entriesCollection = db.get("entries");
-const groupsCollection = db.get("groups");
 // @todo: Create unique indexes when impplementing post and update methods
+const Permissions = {
+  EntriesCreate: "entries:create",
+  GroupsCreate: "groups:create",
+  GroupsControl: "groups:control",
+  AuthorizationGrant: "authorization:grant"
+};
+
 
 class MailpyController {
   constructor() {
-    const topSecret = { topSecret: "Secret Content" };
   }
+  async getGrants(req, res, next) {
+    try {
 
-  async getProtected(req, res, next) {
-    return res.json(topSecret);
+      const data = db.getGrants();
+      return res.json(data);
+
+    } catch (errr) {
+      console.error(errr);
+      next("Failed to get grants");
+    }
+  }
+  async getUser(req, res, next) {
+    try {
+      const { id, displayName, mail } = res.locals.validatedClaims;
+      let user = await db.getUser(id);
+
+      if (!user) {
+        console.warn(`The user ${displayName} id ${id} is not registered.`);
+        const response = await db.createUser(id, displayName, mail, []);
+
+        let user = await db.getUser(id);
+
+        if (!user) {
+          console.error(`Failed to register user id=${id} displayName=${displayName}`)
+          return next("User registration failed");
+        }
+
+        console.log(`New user ${user} created`);
+      }
+
+      return res.json(user);
+    } catch (error) {
+      console.error(`Unexpected error`, error);
+      next("Failed to perform operation");
+    }
   }
 
   async getGroups(req, res, next) {
-    const data = await groupsCollection.find({});
+    const data = await db.getGroups();
     return res.json(data);
   }
 
@@ -38,12 +73,13 @@ class MailpyController {
   }
 
   async getConditions(req, res, next) {
-    const data = await conditionsCollection.find({});
+    const data = await db.getConditions();
+    console.log('Conditions', data);
     return res.json(data);
   }
 
   async getEntries(req, res, next) {
-    const data = await entriesCollection.find({});
+    const data = await db.getEntries();
     return res.json(data);
   }
 

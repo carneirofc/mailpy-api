@@ -5,8 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --inspect  --exec babel-node src/index.js",
+    "test": "jest",
+    "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist"
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,7 @@
   },
   "homepage": "https://github.com/carneirofc/mailpy-api#readme",
   "dependencies": {
-    "@azure/msal-node": "^1.0.0-beta.1",
+    "@azure/msal-node": "^1.0.0-beta.3",
     "@microsoft/microsoft-graph-client": "^2.2.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -27,8 +28,8 @@
     "express": "^4.17.1",
     "helmet": "^4.1.1",
     "jsonwebtoken": "^8.5.1",
-    "jwks-rsa": "^1.11.0",
-    "mongodb": "^3.6.2",
+    "jwks-rsa": "^1.12.2",
+    "mongodb": "^3.6.3",
     "monk": "^7.3.2",
     "morgan": "^1.10.0",
     "nodaemon": "0.0.5",
@@ -38,6 +39,26 @@
     "yup": "^0.29.3"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/node": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "jest": "^26.6.3",
     "nodemon": "^2.0.6"
+  },
+  "jest": {
+    "verbose": true
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/env",
+        {
+          "targets": {
+            "node": "12.19.0"
+          }
+        }
+      ]
+    ]
   }
 }

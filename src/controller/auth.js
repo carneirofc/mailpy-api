@@ -25,9 +25,11 @@ const callResourceAPI = async (newTokenValue, resourceURI) => {
   };
   console.log("Attempt to call Resource API");
 
-  let response = await fetch(resourceURI, options);
-  let json = await response.json();
-  return json;
+  const response = await fetch(resourceURI, options)
+    .then(res => res.json())
+    .then(json => json)
+    .catch(e => console.error(`Failed to get user data from ${resourceURI}, error ${e}`));
+  return response;
 };
 
 const getNewAccessToken = async (userToken) => {
@@ -68,8 +70,8 @@ const getNewAccessToken = async (userToken) => {
   return json;
 };
 
-const validateClaims = async (req, res) => {
-  console.log("Validated claims: ", JSON.stringify(req.authInfo));
+const validateClaims = async (req, res, next) => {
+  //console.log("Validated claims: ", JSON.stringify(req.authInfo));
 
   // the access token the user sent
   const userToken = req.get("authorization");
@@ -80,7 +82,11 @@ const validateClaims = async (req, res) => {
   // access the resource with token
   let apiResponse = await callResourceAPI(tokenObj["access_token"], auth.resourceUri);
 
-  res.status(200).json(apiResponse);
+  if (apiResponse) {
+    res.locals.validatedClaims = apiResponse;
+    return next();
+  }
+  return next("Failed to obtain user data");
 };
 
 module.exports = { options: options, validateClaims };
