@@ -7,7 +7,7 @@ import { urlencoded } from "body-parser";
 import passport from "passport";
 import { BearerStrategy } from "passport-azure-ad";
 
-import auth from "./controller/azure";
+import { strategyOptions } from "./config/azure"
 import middleware from "./midlewares";
 import indexRouter from "./routes/index";
 import apiRouter from "./routes/api";
@@ -15,12 +15,12 @@ import config from "./config";
 
 const API_ROOT = config.api.API_ROOT;
 
-const bearerStrategy = new BearerStrategy(auth.options, (token, done) => {
+const bearerStrategy = new BearerStrategy(strategyOptions, (token, done) => {
   done(null, {}, token);
 });
 
 const getLoggerLevel = () => {
-  if (process.env.NODE_ENV && process.NODE_ENV.toLowerCase() === "production") {
+  if (process.env.NODE_ENV && process.NODE_ENV === "production") {
     return "combined";
   } else {
     return "dev";

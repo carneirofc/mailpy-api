@@ -1,4 +1,4 @@
-export default {
+const configAzure = {
   audience: "3ab086b7-33bf-4f5e-8c30-72fbdbc12c25",
   authority: "login.microsoftonline.com",
   clientID: "3ab086b7-33bf-4f5e-8c30-72fbdbc12c25",
@@ -14,3 +14,17 @@ export default {
   validateIssuer: true,
   version: "v2.0",
 };
+
+export default configAzure;
+
+export const strategyOptions = {
+  identityMetadata: `https://${configAzure.authority}/${configAzure.tenantID}/${configAzure.version}/${configAzure.discovery}`,
+  issuer: `https://${configAzure.authority}/${configAzure.tenantID}/${configAzure.version}`,
+  clientID: configAzure.clientID,
+  validateIssuer: configAzure.validateIssuer,
+  audience: configAzure.audience,
+  loggingLevel: configAzure.loggingLevel,
+  passReqToCallback: configAzure.passReqToCallback,
+  loggingNoPII: configAzure.loggingNoPII,
+};
+
