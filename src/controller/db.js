@@ -1,38 +1,31 @@
-const config = require("../config");
-const monk = require("monk");
-const { Logger } = require("mongodb");
+import makeDB from "../db";
 
-const db = monk(config.db.MONGODB_URI);
-const conditionsCollection = db.get("conditions");
-const entriesCollection = db.get("entries");
-const groupsCollection = db.get("groups");
-const usersCollection = db.get("users");
-const grantsCollection = db.get("grants");
+const db = await makeDB();
+
+const conditionsCollection = db.collection("conditions");
+const entriesCollection = db.collection("entries");
+const groupsCollection = db.collection("groups");
+const usersCollection = db.collection("users");
+const grantsCollection = db.collection("grants");
 
 const getUser = async (id) => {
-    return usersCollection.findOne({
-        "id": { "$eq": id }
-    });
-}
+  const db = await db;
+
+  return db.collection("users").findOne({
+    id: { $eq: id },
+  });
+};
+
 const createUser = async (id, name, email, grants) => {
-    return usersCollection.insert({
-        "id": id,
-        "email": email,
-        "name": name,
-        "grants": grants
-    });
-}
-const getGrants = async () => grantsCollection.find({});
-const getConditions = async () => conditionsCollection.find({});
-const getGroups = async () => groupsCollection.find({});
-const getEntries = async () => entriesCollection.find({});
+  return usersCollection.insert({
+    id: id,
+    email: email,
+    name: name,
+    grants: grants,
+  });
+};
 
-
-module.exports = {
-    getUser: getUser,
-    createUser: createUser,
-    getGrants: getGrants,
-    getConditions: getConditions,
-    getEntries: getEntries,
-    getGroups: getGroups,
-}
+export const getGrants = async () => grantsCollection.find({});
+export const getConditions = async () => conditionsCollection.find({});
+export const getGroups = async () => groupsCollection.find({});
+export const getEntries = async () => entriesCollection.find({});

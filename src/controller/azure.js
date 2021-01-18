@@ -1,16 +1,17 @@
-const auth = require("../config/auth.json");
-const fetch = require("node-fetch");
-const { URLSearchParams } = require("url");
+import fetch from "node-fetch";
+import { URLSearchParams } from "url";
+
+import configAzure from "../config/azure";
 
 const options = {
-  identityMetadata: `https://${auth.authority}/${auth.tenantID}/${auth.version}/${auth.discovery}`,
-  issuer: `https://${auth.authority}/${auth.tenantID}/${auth.version}`,
-  clientID: auth.clientID,
-  validateIssuer: auth.validateIssuer,
-  audience: auth.audience,
-  loggingLevel: auth.loggingLevel,
-  passReqToCallback: auth.passReqToCallback,
-  loggingNoPII: auth.loggingNoPII,
+  identityMetadata: `https://${configAzure.authority}/${configAzure.tenantID}/${configAzure.version}/${configAzure.discovery}`,
+  issuer: `https://${configAzure.authority}/${configAzure.tenantID}/${configAzure.version}`,
+  clientID: configAzure.clientID,
+  validateIssuer: configAzure.validateIssuer,
+  audience: configAzure.audience,
+  loggingLevel: configAzure.loggingLevel,
+  passReqToCallback: configAzure.passReqToCallback,
+  loggingNoPII: configAzure.loggingNoPII,
 };
 
 const callResourceAPI = async (newTokenValue, resourceURI) => {
@@ -26,9 +27,9 @@ const callResourceAPI = async (newTokenValue, resourceURI) => {
   console.log("Attempt to call Resource API");
 
   const response = await fetch(resourceURI, options)
-    .then(res => res.json())
-    .then(json => json)
-    .catch(e => console.error(`Failed to get user data from ${resourceURI}, error ${e}`));
+    .then((res) => res.json())
+    .then((json) => json)
+    .catch((e) => console.error(`Failed to get user data from ${resourceURI}, error ${e}`));
   return response;
 };
 
@@ -38,17 +39,17 @@ const getNewAccessToken = async (userToken) => {
    * In a default environment the user would be propted at the SPA to accept and give the permission, but in our tenant it's more restrictive.
    * */
   const [bearer, tokenValue] = userToken.split(" ");
-  const tokenEndpoint = `https://${auth.authority}/${auth.tenantID}/oauth2/${auth.version}/token`;
+  const tokenEndpoint = `https://${configAzure.authority}/${configAzure.tenantID}/oauth2/${configAzure.version}/token`;
 
   let myHeaders = new fetch.Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
   let urlencoded = new URLSearchParams();
   urlencoded.append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-  urlencoded.append("client_id", auth.clientID);
-  urlencoded.append("client_secret", auth.clientSecret);
+  urlencoded.append("client_id", configAzure.clientID);
+  urlencoded.append("client_secret", configAzure.clientSecret);
   urlencoded.append("assertion", tokenValue);
-  urlencoded.append("scope", auth.resourceScope.join(" "));
+  urlencoded.append("scope", configAzure.resourceScope.join(" "));
   urlencoded.append("requested_token_use", "on_behalf_of");
 
   console.log(`Encoded url ${tokenEndpoint}/${urlencoded.toString()}\n\n`);
@@ -70,9 +71,7 @@ const getNewAccessToken = async (userToken) => {
   return json;
 };
 
-const validateClaims = async (req, res, next) => {
-  //console.log("Validated claims: ", JSON.stringify(req.authInfo));
-
+const getAzureUserInfo = async (req, res, next) => {
   // the access token the user sent
   const userToken = req.get("authorization");
 
@@ -80,7 +79,7 @@ const validateClaims = async (req, res, next) => {
   let tokenObj = await getNewAccessToken(userToken);
 
   // access the resource with token
-  let apiResponse = await callResourceAPI(tokenObj["access_token"], auth.resourceUri);
+  let apiResponse = await callResourceAPI(tokenObj["access_token"], configAzure.resourceUri);
 
   if (apiResponse) {
     res.locals.validatedClaims = apiResponse;
@@ -89,4 +88,4 @@ const validateClaims = async (req, res, next) => {
   return next("Failed to obtain user data");
 };
 
-module.exports = { options: options, validateClaims };
+export default { getAzureUserInfo };
