@@ -1,25 +1,20 @@
-const { Logger } = require("mongodb");
-const config = require("../config");
-const db = require("./db");
+import config from "../config";
+import db from "./db";
 
 // @todo: Create unique indexes when impplementing post and update methods
 const Permissions = {
   EntriesCreate: "entries:create",
   GroupsCreate: "groups:create",
   GroupsControl: "groups:control",
-  AuthorizationGrant: "authorization:grant"
+  AuthorizationGrant: "authorization:grant",
 };
 
-
 class MailpyController {
-  constructor() {
-  }
+  constructor() {}
   async getGrants(req, res, next) {
     try {
-
       const data = db.getGrants();
       return res.json(data);
-
     } catch (errr) {
       console.error(errr);
       next("Failed to get grants");
@@ -37,7 +32,7 @@ class MailpyController {
         let user = await db.getUser(id);
 
         if (!user) {
-          console.error(`Failed to register user id=${id} displayName=${displayName}`)
+          console.error(`Failed to register user id=${id} displayName=${displayName}`);
           return next("User registration failed");
         }
 
@@ -74,7 +69,7 @@ class MailpyController {
 
   async getConditions(req, res, next) {
     const data = await db.getConditions();
-    console.log('Conditions', data);
+    console.log("Conditions", data);
     return res.json(data);
   }
 
@@ -100,4 +95,4 @@ class MailpyController {
   }
 }
 
-module.exports = new MailpyController();
+export default new MailpyController();
