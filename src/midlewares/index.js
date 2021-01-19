@@ -15,8 +15,4 @@ const exceptionHappened = (error, req, res, next) => {
     stack: process.env.NODE_ENV === "production" ? "Something wrong happened" : error.stack,
   });
 };
-
-module.exports = {
-  routeNotFound: routeNotFound,
-  exceptionHappened: exceptionHappened,
-};
+export default { routeNotFound, exceptionHappened };
