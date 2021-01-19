@@ -1,6 +1,30 @@
 import fetch from "node-fetch";
+import { ConfidentialClientApplication } from "@azure/msal-node";
+
 import { URLSearchParams } from "url";
 import configAzure from "../config/azure"
+
+const msalConfig = {
+  auth: {
+    clientId: configAzure.clientID,
+    authority: `https://login.microsoftonline.com/${configAzure.tenantId}`,
+    clientSecret: configAzure.clientSecret,
+  }
+};
+const cca = new ConfidentialClientApplication(msalConfig);
+
+const msalAcquireTokenOnBehalfOf = async (authToken) => {
+  const oboRequest = {
+    oboAssertion: authToken,
+    scopes: configAzure.resourceScope,
+  }
+
+  const {
+    accessToken,
+  } = await cca.acquireTokenOnBehalfOf(oboRequest);
+
+  return accessToken;
+}
 
 const callResourceAPI = async (newTokenValue, resourceURI) => {
   let options = {
@@ -21,14 +45,14 @@ const callResourceAPI = async (newTokenValue, resourceURI) => {
   return response;
 };
 
-const getNewAccessToken = async (userToken) => {
+/** @deprecated Use msal-node instead */
+const getNewAccessToken = async (token) => {
   /**
    * The administrator consent is needed. Same problem described at:
    * https://stackoverflow.com/questions/56266148/aad-how-do-you-send-an-interactive-authorization-request-to-resolve-aadsts650
    * In a default environment the user would be propted at the SPA to accept and give the permission, but in our tenant it's more restrictive.
    * */
-  const [bearer, tokenValue] = userToken.split(" ");
-  const tokenEndpoint = `https://${configAzure.authority}/${configAzure.tenantID}/oauth2/${configAzure.version}/token`;
+  const tokenEndpoint = `https://${configAzure.authority}/${configAzure.tenantId}/oauth2/${configAzure.version}/token`;
 
   let myHeaders = new fetch.Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -37,7 +61,7 @@ const getNewAccessToken = async (userToken) => {
   urlencoded.append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
   urlencoded.append("client_id", configAzure.clientID);
   urlencoded.append("client_secret", configAzure.clientSecret);
-  urlencoded.append("assertion", tokenValue);
+  urlencoded.append("assertion", token);
   urlencoded.append("scope", configAzure.resourceScope.join(" "));
   urlencoded.append("requested_token_use", "on_behalf_of");
 
@@ -60,17 +84,20 @@ const getNewAccessToken = async (userToken) => {
 };
 
 /** Return Azure "/me" @param authorization: Authorization header */
-export const getAzureUserInfo = async (authorization) => {
-  // the access token the user sent
-  // const userToken = req.get("authorization");
+export const getAzureUserInfo = async (userToken) => {
 
-  // request new token and use it to call resource API on user's behalf
-  let tokenObj = await getNewAccessToken(userToken);
+  // Acquire OBO Token
+  const accessToken = await msalAcquireTokenOnBehalfOf(userToken);
 
   // access the resource "/me" with token
-  let apiResponse = await callResourceAPI(tokenObj["access_token"], configAzure.resourceUri);
+  const apiResponse = await callResourceAPI(accessToken, configAzure.resourceUri);
 
-  return apiResponse;
+  return Object.freeze({
+    id: apiResponse.id,
+    mail: apiResponse.mail,
+    name: apiResponse.displayName,
+    login: apiResponse.userPrincipalName,
+  });
 };
 
 export default Object.freeze({

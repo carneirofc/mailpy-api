@@ -5,7 +5,7 @@ const makeGetUser = ({ userLogin }) => {
     };
     try {
 
-      const [type, tokenValue] = httpRequest.headers.get("Authorization").split(" ");
+      const [type, tokenValue] = httpRequest.headers.Authorization.split(" ");
 
       if (type !== "Bearer") {
         throw `Unsupported Authorization token type. Expected type 'Bearer' received ${type}.`
