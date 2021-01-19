@@ -4,9 +4,9 @@
   "description": "Rest API for Mailpy",
   "main": "src/index.js",
   "scripts": {
-    "build": "npm run clean && mkdir -p build && babel src -s -D -d build",
+    "build": "npm run clean && mkdir -p build && babel src --source-maps --copy-files --out-dir build",
     "clean": "rm -rf build/",
-    "dev": "nodemon --inspect  --exec babel-node src/index.js",
+    "dev": "nodemon --inspect --exec babel-node src/index.js",
     "start": "node build/index.js",
     "test": "jest"
   },
@@ -51,12 +51,14 @@
     "verbose": true
   },
   "babel": {
+    "sourceMaps": "inline",
+    "retainLines": true,
     "presets": [
       [
         "@babel/env",
         {
           "targets": {
-            "node": "15.3.0"
+            "node": "14.14.0"
           }
         }
       ]
