@@ -9,7 +9,7 @@ const configAzure = {
   passReqToCallback: false,
   resourceScope: ["https://graph.microsoft.com/User.Read"],
   resourceUri: "https://graph.microsoft.com/v1.0/me",
-  tenantID: "ed764e1f-b3b8-4aaf-8fb2-1d05be08443b",
+  tenantId: "ed764e1f-b3b8-4aaf-8fb2-1d05be08443b",
   tenantName: "CNPEMCAMP",
   validateIssuer: true,
   version: "v2.0",
@@ -18,8 +18,8 @@ const configAzure = {
 export default configAzure;
 
 export const strategyOptions = {
-  identityMetadata: `https://${configAzure.authority}/${configAzure.tenantID}/${configAzure.version}/${configAzure.discovery}`,
-  issuer: `https://${configAzure.authority}/${configAzure.tenantID}/${configAzure.version}`,
+  identityMetadata: `https://${configAzure.authority}/${configAzure.tenantId}/${configAzure.version}/${configAzure.discovery}`,
+  issuer: `https://${configAzure.authority}/${configAzure.tenantId}/${configAzure.version}`,
   clientID: configAzure.clientID,
   validateIssuer: configAzure.validateIssuer,
   audience: configAzure.audience,
