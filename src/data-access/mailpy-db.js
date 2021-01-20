@@ -1,9 +1,29 @@
-const conditions = "conditions";
-const groups = "groups";
-const entries = "entries";
-const users = "users";
+import {
+  collections
+} from "../../db/mailpy-db-setup";
+
+const {
+  conditions,
+  entries,
+  grants,
+  groups,
+  roles,
+  users,
+} = collections;
 
 export default function makeMailpyDb({ makeDb }) {
+
+  const findAllRoles = async () => {
+    const db = await makeDb();
+    const result = await db.collection(roles).find({}).toArray();
+    return result;
+  }
+
+  const findAllGrants = async () => {
+    const db = await makeDb();
+    const result = await db.collection(grants).find({}).toArray();
+    return result;
+  }
 
   const findAllConditions = async () => {
     const db = await makeDb();
@@ -52,6 +72,8 @@ export default function makeMailpyDb({ makeDb }) {
     findAllConditions,
     findAllEntries,
     findAllGroups,
+    findAllGrants,
+    findAllRoles,
     findUserById,
     insertUser
   });
