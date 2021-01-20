@@ -8,7 +8,7 @@
     "clean": "rm -rf build/",
     "dev": "nodemon --inspect --exec babel-node src/index.js",
     "start": "node build/index.js",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "repository": {
     "type": "git",
@@ -44,11 +44,11 @@
     "@babel/core": "^7.12.10",
     "@babel/node": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
+    "babel-jest": "^26.6.3",
     "jest": "^26.6.3",
+    "jest-environment-node": "^26.6.2",
+    "mongodb-memory-server": "^6.9.3",
     "nodemon": "^2.0.6"
-  },
-  "jest": {
-    "verbose": true
   },
   "babel": {
     "sourceMaps": "inline",
@@ -58,7 +58,7 @@
         "@babel/env",
         {
           "targets": {
-            "node": "14.14.0"
+            "node": "current"
           }
         }
       ]
