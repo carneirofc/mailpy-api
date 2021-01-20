@@ -1,20 +1,25 @@
 import makeDb from "../../fixtures/db";
 import makeMailpyDb from "./mailpy-db";
-import makeMailpyDbSetup, { conditionsEnum, grantsEnum } from "../../db/mailpy-db-setup";
+import makeMailpyDbSetup from "../../db/mailpy-db-setup";
+import makeMailpyDbData, {
+  conditionsEnum,
+  grantsEnum,
+  defaultRoles
+} from "../../db/mailpy-db-data";
 
 beforeAll(async () => {
-  const setup = makeMailpyDbSetup({ makeDb });
-  await setup.createDatabase();
+  const { createDatabase } = makeMailpyDbSetup({ makeDb });
+  await createDatabase();
+  const { insertData } = makeMailpyDbData({ makeDb });
+  await insertData();
 })
 
 describe("mailpy db", () => {
   let mailpyDb;
 
-
   beforeEach(async () => {
     mailpyDb = makeMailpyDb({ makeDb });
   })
-
 
   it("List conditions", async () => {
     const conditions = await mailpyDb.findAllConditions();
@@ -24,6 +29,11 @@ describe("mailpy db", () => {
   it("List grants", async () => {
     const grants = await mailpyDb.findAllGrants();
     expect(grants.length).toBe(Object.keys(grantsEnum).length);
+  })
+
+  it("List initial roles", async () => {
+    const roles = await mailpyDb.findAllRoles();
+    expect(roles.length).toBe(Object.keys(defaultRoles).length);
   })
 
 })
