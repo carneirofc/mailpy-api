@@ -26,7 +26,7 @@ const listFromObjects = (objs) => {
 }
 
 const createConditions = async (db) => {
-  console.log(`Creating ${conditions}`);
+  // console.log(`Creating ${conditions}`);
   db.createCollection(conditions, {
     validator: {
       $jsonSchema: {
@@ -50,7 +50,7 @@ const createConditions = async (db) => {
 }
 
 const createGrants = async (db) => {
-  console.log(`Creating ${grants}`);
+  // console.log(`Creating ${grants}`);
   await db.createCollection(grants, {
     validator: {
       $jsonSchema: {
@@ -74,7 +74,7 @@ const createGrants = async (db) => {
 }
 
 const crateGroups = async (db) => {
-  console.log(`Creating ${groups}`);
+  // console.log(`Creating ${groups}`);
   await db.createCollection(groups, {
     validator: {
       $jsonSchema: {
@@ -98,7 +98,7 @@ const crateGroups = async (db) => {
 }
 
 const createEntries = async (db) => {
-  console.log(`Creating ${entries}`);
+  // console.log(`Creating ${entries}`);
   db.createCollection(entries, {
     validator: {
       $jsonSchema: {
@@ -136,7 +136,7 @@ const createEntries = async (db) => {
 }
 
 const createUsers = async (db) => {
-  console.log(`Creating ${users}`);
+  // console.log(`Creating ${users}`);
   db.createCollection(users, {
     validator: {
       $jsonSchema: {
@@ -168,7 +168,7 @@ const createUsers = async (db) => {
 }
 
 const createRoles = async (db) => {
-  console.log(`Creating ${roles}`);
+  // console.log(`Creating ${roles}`);
   db.createCollection(roles, {
     validator: {
       $jsonSchema: {
@@ -216,7 +216,19 @@ export default function makeMailpyDbSetup({ makeDb }) {
     await crateGroups(db);      // Group of entries
 
   }
+
+  const resetDatabase = async () => {
+    console.log(`Reseting collections`);
+    const db = await makeDb();
+
+    for (let key in collections) {
+      // console.log(`Erasing collection ${collections[key]}`);
+      await db.dropCollection(collections[key]);
+    }
+  }
+
   return Object.freeze({
-    createDatabase
+    createDatabase,
+    resetDatabase
   });
 }
