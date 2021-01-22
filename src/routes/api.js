@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Router } from "express";
+import makeCallback from "../helpers/express-callback";
 
-import makeCallback from "../express-callback";
 import {
   getConditions,
   getEntries,
