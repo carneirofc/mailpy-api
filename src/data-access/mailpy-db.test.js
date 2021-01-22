@@ -14,6 +14,11 @@ beforeAll(async () => {
   await insertData();
 })
 
+afterAll(async () => {
+  const { resetDatabase } = makeMailpyDbSetup({ makeDb });
+  await resetDatabase();
+})
+
 describe("mailpy db", () => {
   let mailpyDb;
 

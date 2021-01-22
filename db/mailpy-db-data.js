@@ -89,6 +89,7 @@ export default function makeMailpyDbData({ makeDb }) {
     await insertRoles(db);
 
   }
+
   return Object.freeze({
     insertData
   });
