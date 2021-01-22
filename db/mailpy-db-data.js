@@ -81,7 +81,7 @@ const insertRoles = async (db) => {
 
 export default function makeMailpyDbData({ makeDb }) {
   const insertData = async () => {
-    console.log(`Initial database data`);
+    // console.log(`Initial database data`);
     const db = await makeDb();
 
     await insertConditions(db);

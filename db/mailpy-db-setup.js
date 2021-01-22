@@ -141,11 +141,11 @@ const createUsers = async (db) => {
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: ["id", "name", "email", "roles"],
+        required: ["uuid", "name", "email", "roles"],
         properties: {
-          id: {
+          uuid: {
             bsonType: "string",
-            description: "Required string type",
+            description: "Universal unique ID, the link to the external identity provider",
           },
           name: {
             bsonType: "string",
@@ -164,7 +164,7 @@ const createUsers = async (db) => {
     },
   });
   const collection = db.collection(users);
-  await collection.createIndex({ id: 1 }, { unique: true });
+  await collection.createIndex({ uuid: 1 }, { unique: true });
 }
 
 const createRoles = async (db) => {
@@ -202,7 +202,7 @@ const createRoles = async (db) => {
 
 export default function makeMailpyDbSetup({ makeDb }) {
   const createDatabase = async () => {
-    console.log(`Initialising database`);
+    //   console.log(`Initialising database`);
     const db = await makeDb();
 
     // Authorization
@@ -218,7 +218,7 @@ export default function makeMailpyDbSetup({ makeDb }) {
   }
 
   const resetDatabase = async () => {
-    console.log(`Reseting collections`);
+    //  console.log(`Reseting collections`);
     const db = await makeDb();
 
     for (let key in collections) {
