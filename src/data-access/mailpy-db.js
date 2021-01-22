@@ -1,7 +1,8 @@
 import {
   collections
 } from "../../db/mailpy-db-setup";
-
+import { DatabaseDuplicatedKeyError } from "../helpers/errors";
+import { CodeDuplicatedKey } from "./error-codes";
 const {
   conditions,
   entries,
@@ -11,12 +12,15 @@ const {
   users,
 } = collections;
 
-export default function makeMailpyDb({ makeDb }) {
+
+export default function makeMailpyDb({
+  makeDb
+}) {
 
   const findAllRoles = async () => {
     const db = await makeDb();
     const result = await db.collection(roles).find({}).toArray();
-    return result;
+    return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
   }
 
   const findAllGrants = async () => {
@@ -43,30 +47,45 @@ export default function makeMailpyDb({ makeDb }) {
     return result;
   }
 
-  const findUserById = async (id) => {
+  const findUserByUUID = async (uuid) => {
     const db = await makeDb();
     const result = db.collection(users).findOne({
-      id: { $eq: id },
+      uuid: { $eq: uuid },
     });
     if (result) {
-      //@todo: Have a user type
-      return result;
+      return Object.freeze({
+        id: result._id.toString(),
+        uuid: result.uuid,
+        name: result.name,
+        email: result.email,
+        groups: result.groups,
+      });
     }
     return null;
   }
 
-  const insertUser = async ({ id, email, name, grants }) => {
+  const insertUser = async ({ uuid, email, name, roles }) => {
     const db = await makeDb();
-    const result = await db.collection(users).insert({
-      id: id,
+    const result = await db.collection(users).insertOne({
+      uuid: uuid,
       email: email,
       name: name,
-      grants: grants,
+      roles: roles,
+    }).catch(error => {
+      const { code, message } = error;
+      if (code == CodeDuplicatedKey) {
+        throw new DatabaseDuplicatedKeyError(message);
+      }
+      throw new error;
     });
 
     // Return the inserted object
     return result.ops[0];
   };
+
+  const deleteUserByUUID = async ({ uuid }) => {
+    const db = await makeDb();
+  }
 
   return Object.freeze({
     findAllConditions,
@@ -74,7 +93,7 @@ export default function makeMailpyDb({ makeDb }) {
     findAllGroups,
     findAllGrants,
     findAllRoles,
-    findUserById,
+    findUserByUUID,
     insertUser
   });
 
