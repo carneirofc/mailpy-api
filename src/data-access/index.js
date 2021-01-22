@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 import config from "./config";
 import makeMailpyDB from "./mailpy-db";
@@ -12,7 +12,6 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   useNewUrlParser: true,
 });
-console.info("Done ...");
 
 export const makeDb = async () => {
   if (!client.isConnected()) {
@@ -24,7 +23,12 @@ export const makeDb = async () => {
   return client.db();
 };
 
-const mailpyDb = makeMailpyDB({ makeDb });
+
+const mailpyDb = makeMailpyDB({
+  makeDb
+});
+
+export const getId = ({ id }) => { return new ObjectId(id); }
 
 export default mailpyDb;
 
