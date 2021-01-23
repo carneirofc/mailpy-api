@@ -15,16 +15,6 @@ export const collections = Object.freeze({
 });
 
 
-const listFromObjects = (objs) => {
-  /** Given an object where the key is the corresponding entry name, obtain a list */
-  const items = [];
-  for (let name in objs) {
-    const obj = objs[name];
-    items.push({ ...obj, name: name });
-  }
-  return items;
-}
-
 const createConditions = async (db) => {
   // console.log(`Creating ${conditions}`);
   db.createCollection(conditions, {
