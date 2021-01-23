@@ -93,7 +93,7 @@ export const getAzureUserInfo = async (userToken) => {
   const apiResponse = await callResourceAPI(accessToken, configAzure.resourceUri);
 
   return Object.freeze({
-    id: apiResponse.id,
+    uuid: apiResponse.id,
     mail: apiResponse.mail,
     name: apiResponse.displayName,
     login: apiResponse.userPrincipalName,
