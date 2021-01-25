@@ -1,21 +1,20 @@
 import { makeUser } from "../entities";
 
-export default function makeUserLogin({ mailpyDb, getExternalUserInfo, addUser }) {
+export default function makeUserLogin({ mailpyDb, usersDb, getExternalUserInfo }) {
   return async function (authToken) {
-
     // Get information from azure
     const externalInfo = getExternalUserInfo(authToken);
 
     // Check if the user exists
-    let result = await mailpyDb.findUserByUUID({ uuid: externalInfo.uuid });
+    let result = await usersDb.findByUUID({ uuid: externalInfo.uuid });
 
     if (!result) {
       // Crete a user with no roles
-      result = await mailpyDb.insertUser({
+      result = await usersDb.insert({
         uuid: externalInfo.uuid,
         email: externalInfo.email,
         name: externalInfo.name,
-        roles: []
+        roles: [],
       });
     }
 
@@ -24,10 +23,10 @@ export default function makeUserLogin({ mailpyDb, getExternalUserInfo, addUser }
       name: result.name,
       uuid: result.uuid,
       email: result.email,
-      roles: result.roles
+      roles: result.roles,
     });
 
-    // Return normalized user info
+    // Return user info
     return user;
-  }
+  };
 }
