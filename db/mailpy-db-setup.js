@@ -11,9 +11,8 @@ export const collections = Object.freeze({
   groups,
   users,
   roles,
-  grants
+  grants,
 });
-
 
 const createConditions = async (db) => {
   // console.log(`Creating ${conditions}`);
@@ -37,7 +36,7 @@ const createConditions = async (db) => {
   });
   const collection = db.collection(conditions);
   await collection.createIndex({ name: 1 }, { unique: true });
-}
+};
 
 const createGrants = async (db) => {
   // console.log(`Creating ${grants}`);
@@ -61,7 +60,7 @@ const createGrants = async (db) => {
   });
   const collection = db.collection(grants);
   await collection.createIndex({ name: 1 }, { unique: true });
-}
+};
 
 const crateGroups = async (db) => {
   // console.log(`Creating ${groups}`);
@@ -85,7 +84,7 @@ const crateGroups = async (db) => {
   });
   const collection = db.collection(groups);
   await collection.createIndex({ name: 1 }, { unique: true });
-}
+};
 
 const createEntries = async (db) => {
   // console.log(`Creating ${entries}`);
@@ -119,11 +118,8 @@ const createEntries = async (db) => {
     },
   });
   const collection = db.collection(entries);
-  await collection.createIndex(
-    { pvname: 1, emails: 1, condition: 1, alarm_values: 1 },
-    { unique: true }
-  );
-}
+  await collection.createIndex({ pvname: 1, emails: 1, condition: 1, alarm_values: 1 }, { unique: true });
+};
 
 const createUsers = async (db) => {
   // console.log(`Creating ${users}`);
@@ -148,14 +144,14 @@ const createUsers = async (db) => {
           roles: {
             bsonType: "array",
             description: "User roles",
-          }
+          },
         },
       },
     },
   });
   const collection = db.collection(users);
   await collection.createIndex({ uuid: 1 }, { unique: true });
-}
+};
 
 const createRoles = async (db) => {
   // console.log(`Creating ${roles}`);
@@ -163,11 +159,7 @@ const createRoles = async (db) => {
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: [
-          "name",
-          "desc",
-          "grants",
-        ],
+        required: ["name", "desc", "grants"],
         properties: {
           name: {
             description: "Role name",
@@ -179,16 +171,15 @@ const createRoles = async (db) => {
           },
           grants: {
             bsonType: "array",
-            description: "Role grants"
-          }
-        }
-      }
-    }
+            description: "Role grants",
+          },
+        },
+      },
+    },
   });
   const collection = db.collection(roles);
-  await collection.createIndex({ name: 1 }, { unique: true })
-}
-
+  await collection.createIndex({ name: 1 }, { unique: true });
+};
 
 export default function makeMailpyDbSetup({ makeDb }) {
   const createDatabase = async () => {
@@ -202,10 +193,9 @@ export default function makeMailpyDbSetup({ makeDb }) {
 
     // App bahaviour
     await createConditions(db); // Alarm conditions
-    await createEntries(db);    // Entries
-    await crateGroups(db);      // Group of entries
-
-  }
+    await createEntries(db); // Entries
+    await crateGroups(db); // Group of entries
+  };
 
   const resetDatabase = async () => {
     //  console.log(`Reseting collections`);
@@ -215,10 +205,10 @@ export default function makeMailpyDbSetup({ makeDb }) {
       // console.log(`Erasing collection ${collections[key]}`);
       await db.dropCollection(collections[key]);
     }
-  }
+  };
 
   return Object.freeze({
     createDatabase,
-    resetDatabase
+    resetDatabase,
   });
 }
