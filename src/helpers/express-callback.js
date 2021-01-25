@@ -12,12 +12,12 @@ export default function makeExpressCallback(controller) {
         "Content-Type": req.get("Content-Type"),
         "User-Agent": req.get("User-Agent"),
         Referer: req.get("referer"),
-        Authorization: req.get("authorization")
-      }
+        Authorization: req.get("authorization"),
+      },
     };
 
     controller(httpRequest)
-      .then(httpResponse => {
+      .then((httpResponse) => {
         /** Receive the response from the controller and send it through express */
         if (httpResponse) {
           res.set(httpResponse.headers);
@@ -26,10 +26,10 @@ export default function makeExpressCallback(controller) {
         res.status(httpResponse.statusCode);
         res.send(httpResponse.body);
       })
-      .catch(e => {
+      .catch((e) => {
         res.status(500);
         res.send({ error: "An unknow error ocurred" });
-        console.error(`Unknown error ${e}`, e)
+        console.error(`Unknown error ${e}`, e);
       });
-  }
+  };
 }
