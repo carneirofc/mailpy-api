@@ -27,4 +27,3 @@ export const strategyOptions = {
   passReqToCallback: configAzure.passReqToCallback,
   loggingNoPII: configAzure.loggingNoPII,
 };
-
