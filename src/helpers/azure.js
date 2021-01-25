@@ -2,14 +2,14 @@ import fetch from "node-fetch";
 import { ConfidentialClientApplication } from "@azure/msal-node";
 
 import { URLSearchParams } from "url";
-import configAzure from "../config/azure"
+import configAzure from "../config/azure";
 
 const msalConfig = {
   auth: {
     clientId: configAzure.clientID,
     authority: `https://login.microsoftonline.com/${configAzure.tenantId}`,
     clientSecret: configAzure.clientSecret,
-  }
+  },
 };
 const cca = new ConfidentialClientApplication(msalConfig);
 
@@ -17,14 +17,12 @@ const msalAcquireTokenOnBehalfOf = async (authToken) => {
   const oboRequest = {
     oboAssertion: authToken,
     scopes: configAzure.resourceScope,
-  }
+  };
 
-  const {
-    accessToken,
-  } = await cca.acquireTokenOnBehalfOf(oboRequest);
+  const { accessToken } = await cca.acquireTokenOnBehalfOf(oboRequest);
 
   return accessToken;
-}
+};
 
 const callResourceAPI = async (newTokenValue, resourceURI) => {
   let options = {
@@ -85,7 +83,6 @@ const getNewAccessToken = async (token) => {
 
 /** Return Azure "/me" @param authorization: Authorization header */
 export const getAzureUserInfo = async (userToken) => {
-
   // Acquire OBO Token
   const accessToken = await msalAcquireTokenOnBehalfOf(userToken);
 
@@ -101,5 +98,5 @@ export const getAzureUserInfo = async (userToken) => {
 };
 
 export default Object.freeze({
-  getAzureUserInfo
+  getAzureUserInfo,
 });
