@@ -7,7 +7,7 @@ import { urlencoded } from "body-parser";
 import passport from "passport";
 import { BearerStrategy } from "passport-azure-ad";
 
-import { strategyOptions } from "./config/azure"
+import { strategyOptions } from "./config/azure";
 import middleware from "./midlewares";
 import indexRouter from "./routes/index";
 import apiRouter from "./routes/api";
