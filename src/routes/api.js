@@ -2,12 +2,7 @@ import passport from "passport";
 import { Router } from "express";
 import makeCallback from "../helpers/express-callback";
 
-import {
-  getConditions,
-  getEntries,
-  getGroups,
-  getUser,
-} from "../controller";
+import { getConditions, getEntries, getGroups, getUserLogin } from "../controller";
 
 import config from "../config";
 
@@ -31,7 +26,7 @@ const pushRoute = (type, name, ...args) => {
 pushRoute("get", `/conditions`, makeCallback(getConditions));
 pushRoute("get", `/entries`, makeCallback(getEntries));
 pushRoute("get", `/groups`, makeCallback(getGroups));
-pushRoute("get", `/user/login`, passport.authenticate("oauth-bearer", { session: false }), makeCallback(getUser));
+pushRoute("get", `/user/login`, passport.authenticate("oauth-bearer", { session: false }), makeCallback(getUserLogin));
 
 console.info("Available API endpoints");
 routesList.forEach((e) => console.info(`${e}`));
