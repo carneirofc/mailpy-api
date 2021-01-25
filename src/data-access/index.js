@@ -2,6 +2,7 @@ import { MongoClient, ObjectId } from "mongodb";
 
 import config from "./config";
 import makeMailpyDB from "./mailpy-db";
+import makeUsersDb from "./users-db";
 
 const uri = config.MONGODB_URI;
 const options = config.options;
@@ -23,12 +24,10 @@ export const makeDb = async () => {
   return client.db();
 };
 
+export const mailpyDb = makeMailpyDB({ makeDb });
 
-const mailpyDb = makeMailpyDB({
-  makeDb
-});
+export const usersDb = makeUsersDb({ makeDb });
 
-export const getId = ({ id }) => { return new ObjectId(id); }
-
-export default mailpyDb;
-
+export const getId = ({ id }) => {
+  return new ObjectId(id);
+};
