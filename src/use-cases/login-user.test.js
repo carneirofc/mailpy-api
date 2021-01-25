@@ -1,29 +1,29 @@
 import makeDb from "../../fixtures/db";
-import makeMailpyDb from "../data-access/mailpy-db"
+import makeMailpyDb from "../data-access/mailpy-db";
+import makeUsersDb from "../data-access/users-db";
 import makeMailpyDbSetup from "../../db/mailpy-db-setup";
 
 import makeUserLogin from "./login-user";
 import faker from "faker";
 
-
 beforeAll(async () => {
   const { createDatabase } = makeMailpyDbSetup({ makeDb });
   await createDatabase();
-})
+});
 
 afterAll(async () => {
   const { resetDatabase } = makeMailpyDbSetup({ makeDb });
   await resetDatabase();
-})
+});
 
 describe("perform a user login", () => {
   let mailpyDb;
+  let usersDb;
 
   beforeEach(async () => {
-    mailpyDb = makeMailpyDb({
-      makeDb
-    });
-  })
+    mailpyDb = makeMailpyDb({ makeDb });
+    usersDb = makeUsersDb({ makeDb });
+  });
 
   it("user login", async () => {
     const defaultFakeUser = Object.freeze({
@@ -34,7 +34,7 @@ describe("perform a user login", () => {
 
     const getExternalUserInfo = (authorization) => defaultFakeUser;
 
-    const userLogin = makeUserLogin({ mailpyDb, getExternalUserInfo });
+    const userLogin = makeUserLogin({ mailpyDb, usersDb, getExternalUserInfo });
     const user = await userLogin(faker.lorem.sentence());
 
     expect(user.email).toBe(defaultFakeUser.email);
@@ -44,6 +44,5 @@ describe("perform a user login", () => {
     expect(user.id).not.toBeNull();
 
     await userLogin(faker.lorem.sentence());
-  })
-
-})
+  });
+});
