@@ -26,13 +26,7 @@ module.exports = {
   coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: [
-    "node_modules",
-    ".git",
-    "Dockerfile",
-    "docker",
-    ".vscode"
-  ],
+  coveragePathIgnorePatterns: ["node_modules", ".git", "Dockerfile", "docker", ".vscode"],
 
   // Indicates which provider should be used to instrument code for coverage
   // coverageProvider: "babel",
@@ -156,13 +150,7 @@ module.exports = {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: [
-    "node_modules",
-    ".git",
-    "Dockerfile",
-    "docker",
-    ".vscode"
-  ],
+  testPathIgnorePatterns: ["node_modules", ".git", "Dockerfile", "docker", ".vscode"],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
@@ -192,14 +180,14 @@ module.exports = {
   // unmockedModulePathPatterns: undefined,
 
   // Indicates whether each individual test should be reported during the run
-  verbose: true,
+  verbose: false,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
   watchPathIgnorePatterns: [
     "<rootDir>/node_modules/",
     "<rootDir>/Dockerfile",
     "<rootDir>/docker",
-    "<rootDir>/globalConfigMongo.json"
+    "<rootDir>/globalConfigMongo.json",
   ],
 
   // Whether to use watchman for file crawling
