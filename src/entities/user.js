@@ -1,8 +1,7 @@
 import { InvalidPropertyError } from "../helpers/errors";
 
-export default function buildMakeUser({ }) {
+export default function buildMakeUser({}) {
   return function makeUser({ id, name, uuid, email = "", roles = [] }) {
-
     if (!uuid) {
       throw new InvalidPropertyError("UUID is required");
     }
@@ -29,7 +28,7 @@ export default function buildMakeUser({ }) {
       uuid,
       name,
       email,
-      roles
+      roles,
     });
-  }
+  };
 }
