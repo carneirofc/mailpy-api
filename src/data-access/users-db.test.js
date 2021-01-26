@@ -44,8 +44,9 @@ describe("mailpy db", () => {
     expect(result.name).toBe(user.name);
     expect(result.uuid).toBe(user.uuid);
     expect(result.email).toBe(user.email);
-    //@todo: check in a better way, we send the id and get the entire obj
-    // expect(result.roles).toStrictEqual(user.roles);
+    const rolesIds = result.roles.map(({ id }) => id);
+
+    expect(rolesIds).toStrictEqual(user.roles);
 
     await expect(async () => {
       await usersDb.insert({
@@ -63,6 +64,19 @@ describe("mailpy db", () => {
     expect(result).toBe(0);
 
     const roles = await mailpyDb.findAllRoles();
+    result = await usersDb.insert({ ...user });
+
     user.roles.push(roles[0].id);
+    user.roles.push(roles[1].id);
+    result = await usersDb.update({ ...user });
+    expect(result).toBe(true);
+
+    result = await usersDb.findByUUID({ uuid: user.uuid });
+
+    expect(result.roles.length).toBe(2);
+    console.log(result);
+
+    result = await usersDb.deleteByUUID({ uuid: user.uuid });
+    expect(result).toBe(1);
   });
 });
