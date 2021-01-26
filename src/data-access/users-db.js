@@ -5,6 +5,50 @@ import { CodeDuplicatedKey } from "./error-codes";
 const { users } = collections;
 
 export default function makeUsersDb({ makeDb }) {
+  /** Get a set of grants that this user has */
+  const findGrants = async ({ uuid }) => {
+    const db = await makeDb();
+    const results = await db
+      .collection(users)
+      .aggregate([
+        { $match: { uuid: uuid } },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "roles",
+            foreignField: "_id",
+            as: "roles",
+          },
+        },
+        {
+          $lookup: {
+            from: "grants",
+            localField: "roles.grants",
+            foreignField: "_id",
+            as: "grants",
+          },
+        },
+        {
+          $project: {
+            "roles.grants": 0,
+            "roles._id": 0,
+            "roles.desc": 0,
+            "grants.desc": 0,
+          },
+        },
+      ])
+      .toArray();
+
+    if (results.length === 1) {
+      const grants = new Set();
+      results[0].grants.forEach((grant) => {
+        grants.add(grant.name);
+      });
+      return grants;
+    }
+    return null;
+  };
+
   const findByUUID = async ({ uuid }) => {
     /** using aggregate to also get the roles (left join) */
     const db = await makeDb();
@@ -30,17 +74,32 @@ export default function makeUsersDb({ makeDb }) {
         uuid: result.uuid,
         name: result.name,
         email: result.email,
-        groups: result.groups,
+        roles: result.roles,
+        grants: result.grants,
       });
     }
     return null;
   };
 
+  const update = async ({ uuid, email, name, roles }) => {
+    const db = await makeDb();
+    const rolesId = roles.map((role) => new ObjectID(role));
+    const result = await db.collection(users).updateOne(
+      { uuid: uuid },
+      {
+        $set: {
+          email: email,
+          name: name,
+          roles: rolesId,
+        },
+      }
+    );
+    return result.result.ok === 1 && result.result.n === 1;
+  };
+
   const insert = async ({ uuid, email, name, roles }) => {
     const db = await makeDb();
-    const rolesId = roles.map(({ id }) => {
-      _id: ObjectID(id);
-    });
+    const rolesId = roles.map(({ id }) => new ObjectID(id));
     const result = await db
       .collection(users)
       .insertOne({
@@ -59,7 +118,7 @@ export default function makeUsersDb({ makeDb }) {
 
     // Return the inserted object
     const { _id, ...data } = result.ops[0];
-    return { id: _id.toString(), ...data };
+    return { id: _id.toString(), ...data, roles: data.roles.map((id) => id.toString()) };
   };
 
   const deleteByUUID = async ({ uuid }) => {
@@ -76,6 +135,8 @@ export default function makeUsersDb({ makeDb }) {
   return Object.freeze({
     deleteByUUID,
     findByUUID,
+    findGrants,
     insert,
+    update,
   });
 }
