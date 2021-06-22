@@ -12,14 +12,6 @@ describe("User entity tests", () => {
     });
   });
 
-  it("Missing uuid", () => {
-    expect(() => {
-      makeUser({
-        name: faker.name.findName(),
-      });
-    }).toThrow(InvalidPropertyError);
-  });
-
   it("Empty Name", () => {
     expect(() => {
       makeUser({
@@ -43,16 +35,6 @@ describe("User entity tests", () => {
       makeUser({
         name: null,
         uuid: faker.random.uuid(),
-      });
-    }).toThrow(InvalidPropertyError);
-  });
-
-  it("Roles must be an array", () => {
-    expect(() => {
-      makeUser({
-        name: faker.name.findName(),
-        uuid: faker.random.uuid(),
-        roles: "Some Random Role",
       });
     }).toThrow(InvalidPropertyError);
   });
