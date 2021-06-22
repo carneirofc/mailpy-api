@@ -20,7 +20,8 @@ const bearerStrategy = new BearerStrategy(strategyOptions, (token, done) => {
 });
 
 const getLoggerLevel = () => {
-  if (process.env.NODE_ENV && process.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production") {
+    console.info("Node env: Production");
     return "combined";
   } else {
     return "dev";

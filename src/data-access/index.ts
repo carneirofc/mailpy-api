@@ -25,9 +25,8 @@ export const makeDb = async () => {
 };
 
 export const mailpyDb = makeMailpyDB({ makeDb });
-
 export const usersDb = makeUsersDb({ makeDb });
 
-export const getId = ({ id }) => {
+export const getId = ({ id}: {id:string}) => {
   return new ObjectId(id);
 };
