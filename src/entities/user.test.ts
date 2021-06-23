@@ -7,7 +7,7 @@ describe("User entity tests", () => {
     makeUser({
       name: faker.name.findName(),
       email: faker.internet.email(),
-      uuid: faker.random.uuid(),
+      uuid: faker.datatype.uuid(),
       roles: [],
     });
   });
@@ -16,7 +16,7 @@ describe("User entity tests", () => {
     expect(() => {
       makeUser({
         name: "",
-        uuid: faker.random.uuid(),
+        uuid: faker.datatype.uuid(),
       });
     }).toThrow(InvalidPropertyError);
   });
@@ -25,7 +25,7 @@ describe("User entity tests", () => {
     expect(() => {
       makeUser({
         name: " \t\t  \r \t \r\r       ",
-        uuid: faker.random.uuid(),
+        uuid: faker.datatype.uuid(),
       });
     }).toThrow(InvalidPropertyError);
   });
@@ -34,7 +34,7 @@ describe("User entity tests", () => {
     expect(() => {
       makeUser({
         name: null,
-        uuid: faker.random.uuid(),
+        uuid: faker.datatype.uuid(),
       });
     }).toThrow(InvalidPropertyError);
   });

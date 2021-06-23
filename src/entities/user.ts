@@ -1,6 +1,14 @@
 import { InvalidPropertyError } from "../helpers/errors";
+
+export interface ExternalUserInfo {
+  uuid: string;
+  email: string;
+  name: string;
+  login: string;
+}
+
 export type User = {
-  id: string;
+  id: string | undefined;
   name: string;
   uuid: string;
   email: string;
