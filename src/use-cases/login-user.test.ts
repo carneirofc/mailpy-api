@@ -1,23 +1,16 @@
 import faker from "faker";
 
-import makeDb, { closeDb } from "../../fixtures/db";
+import makeDb, { closeDb } from "../../fixtures/db/db";
+import { initApplicationDatabase } from "../../fixtures/db";
+
 import makeMailpyDb, { MailpyDB } from "../data-access/mailpy-db";
 import makeUsersDb, { UsersDb } from "../data-access/users-db";
-import makeMailpyDbSetup from "../../db/mailpy-db-setup";
-
 import makeUserLogin from "./login-user";
 import { ExternalUserInfo } from "../entities/user";
 
-beforeAll(async () => {
-  const { createDatabase } = makeMailpyDbSetup({ makeDb });
-  await createDatabase();
-});
+beforeAll(async () => await initApplicationDatabase({ makeDb }));
 
-afterAll(async () => {
-  const { resetDatabase } = makeMailpyDbSetup({ makeDb });
-  await resetDatabase();
-  await closeDb();
-});
+afterAll(async () => await closeDb());
 
 describe("perform a user login", () => {
   let mailpyDb: MailpyDB;

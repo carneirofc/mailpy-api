@@ -1,62 +1,54 @@
-import { collections } from "../../db/mailpy-db-setup";
+import { Condition, Entry, Group } from "../entities";
+import { databaseCollections } from "../../fixtures/db/mailpy-db-setup";
 import { MakeDb } from "./interfaces";
-const { conditions, entries, grants, groups, roles, users } = collections;
+const { conditions, entries, groups } = databaseCollections;
 
 export interface MailpyDB {
-  findAllConditions: () => Promise<any>;
-  findAllEntries: () => Promise<any>;
-  findAllGroups: () => Promise<any>;
-  findAllGrants: () => Promise<any>;
-  findAllRoles: () => Promise<any>;
+  findAllConditions: () => Promise<Condition[]>;
+  findAllEntries: () => Promise<Entry[]>;
+  findAllGroups: () => Promise<Group[]>;
 }
+
 export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
-  const findAllRoles = async () => {
-    const db = await makeDb();
-    const result = await db
-      .collection(roles)
-      .aggregate([
-        {
-          $lookup: {
-            from: "grants",
-            localField: "grants",
-            foreignField: "_id",
-            as: "grants",
+  class MailpyDBImpl implements MailpyDB {
+    async findAllConditions(): Promise<Condition[]> {
+      const db = await makeDb();
+      const result = await db.collection(conditions).find({}).toArray();
+      return result.map(({ _id: id, desc, name }) => {
+        return {
+          id: id.toString(),
+          desc,
+          name,
+        };
+      });
+    }
+    async findAllGroups(): Promise<Group[]> {
+      const db = await makeDb();
+      const result = await db.collection(groups).find({}).toArray();
+      return result.map(({ _id: id, name, desc, ...data }) => {
+        return { id: id.toString(), name, desc };
+      });
+    }
+
+    async findAllEntries(): Promise<Entry[]> {
+      const db = await makeDb();
+      const result = await db
+        .collection(entries)
+        .aggregate([
+          {
+            $lookup: {
+              from: "groups",
+              localField: "group",
+              foreignField: "name",
+              as: "group",
+            },
           },
-        },
-      ])
-      .toArray();
-    return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
-  };
-
-  const findAllGrants = async () => {
-    const db = await makeDb();
-    const result = await db.collection(grants).find({}).toArray();
-    return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
-  };
-
-  const findAllConditions = async () => {
-    const db = await makeDb();
-    const result = await db.collection(conditions).find({}).toArray();
-    return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
-  };
-
-  const findAllEntries = async () => {
-    const db = await makeDb();
-    const result = await db.collection(entries).find({}).toArray();
-    return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
-  };
-
-  async function findAllGroups() {
-    const db = await makeDb();
-    const result = await db.collection(groups).find({}).toArray();
-    return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
+        ])
+        .toArray();
+      return result.map(({ _id: id, ...data }) => {
+        return { id: id.toString(), ...data };
+      });
+    }
   }
-
-  return Object.freeze({
-    findAllConditions,
-    findAllEntries,
-    findAllGroups,
-    findAllGrants,
-    findAllRoles,
-  });
+  return Object.freeze(new MailpyDBImpl());
 }
