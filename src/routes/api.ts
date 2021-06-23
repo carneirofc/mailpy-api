@@ -9,9 +9,14 @@ import config from "../config";
 const router = Router();
 const API_ROOT = config.api.API_ROOT;
 
-const routesList = [];
+interface Route {
+  name: string;
+  type: string;
+}
+
+const routesList: Route[] = [];
 /** Helper function to keep track of the available endpoints */
-const pushRoute = (type, name, ...args) => {
+const pushRoute = (type: "get" | "use" | "post" | "all", name: string, ...args: any) => {
   switch (type) {
     case "get":
       router.get(name, ...args);
@@ -20,7 +25,7 @@ const pushRoute = (type, name, ...args) => {
       router.all(name, ...args);
       break;
   }
-  routesList.push(`${type} ${API_ROOT}${name}`);
+  routesList.push({ type, name: `${API_ROOT}${name}` });
 };
 
 pushRoute("get", `/conditions`, makeCallback(getConditions));
@@ -29,6 +34,6 @@ pushRoute("get", `/groups`, makeCallback(getGroups));
 pushRoute("get", `/user/login`, passport.authenticate("oauth-bearer", { session: false }), makeCallback(getUserLogin));
 
 console.info("Available API endpoints");
-routesList.forEach((e) => console.info(`${e}`));
+routesList.forEach(({ name, type }) => console.info(`${type} ${name}`));
 
 export default router;
