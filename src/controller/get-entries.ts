@@ -1,4 +1,6 @@
-const makeGetEntries = ({ listEntries }) => {
+import { Controller } from "./comm-types";
+
+const makeGetEntries = ({ listEntries }: { listEntries: () => Promise<any> }): Controller => {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
