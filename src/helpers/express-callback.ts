@@ -1,7 +1,10 @@
+import { RequestHandler } from "express";
+import { Controller, ControllerHttpRequest } from "../controller/comm-types";
+
 /** Interface Express passing a custom http request to the injected controller */
-export default function makeExpressCallback(controller) {
+export default function makeExpressCallback(controller: Controller): RequestHandler {
   return (req, res) => {
-    const httpRequest = {
+    const httpRequest: ControllerHttpRequest = {
       body: req.body,
       query: req.query,
       params: req.params,

@@ -1,8 +1,9 @@
-import fetch from "node-fetch";
+import fetch, { RequestInit, Headers } from "node-fetch";
 import { ConfidentialClientApplication } from "@azure/msal-node";
-
 import { URLSearchParams } from "url";
+
 import configAzure from "../config/azure";
+import { ExternalUserInfo } from "../entities/user";
 
 const msalConfig = {
   auth: {
@@ -13,7 +14,7 @@ const msalConfig = {
 };
 const cca = new ConfidentialClientApplication(msalConfig);
 
-const msalAcquireTokenOnBehalfOf = async (authToken) => {
+const msalAcquireTokenOnBehalfOf = async (authToken: string) => {
   const oboRequest = {
     oboAssertion: authToken,
     scopes: configAzure.resourceScope,
@@ -24,7 +25,7 @@ const msalAcquireTokenOnBehalfOf = async (authToken) => {
   return accessToken;
 };
 
-const callResourceAPI = async (newTokenValue, resourceURI) => {
+const callResourceAPI = async (newTokenValue: string, resourceURI: string) => {
   let options = {
     method: "GET",
     headers: {
@@ -44,7 +45,7 @@ const callResourceAPI = async (newTokenValue, resourceURI) => {
 };
 
 /** @deprecated Use msal-node instead */
-const getNewAccessToken = async (token) => {
+const getNewAccessToken = async (token: string) => {
   /**
    * The administrator consent is needed. Same problem described at:
    * https://stackoverflow.com/questions/56266148/aad-how-do-you-send-an-interactive-authorization-request-to-resolve-aadsts650
@@ -52,7 +53,7 @@ const getNewAccessToken = async (token) => {
    * */
   const tokenEndpoint = `https://${configAzure.authority}/${configAzure.tenantId}/oauth2/${configAzure.version}/token`;
 
-  let myHeaders = new fetch.Headers();
+  let myHeaders: Headers = new Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
   let urlencoded = new URLSearchParams();
@@ -65,7 +66,7 @@ const getNewAccessToken = async (token) => {
 
   console.log(`Encoded url ${tokenEndpoint}/${urlencoded.toString()}\n\n`);
 
-  let options = {
+  let options: RequestInit = {
     method: "POST",
     headers: myHeaders,
     body: urlencoded,
@@ -82,7 +83,7 @@ const getNewAccessToken = async (token) => {
 };
 
 /** Return Azure "/me" @param authorization: Authorization header */
-export const getAzureUserInfo = async (userToken) => {
+export const getAzureUserInfo = async (userToken: string): Promise<ExternalUserInfo> => {
   // Acquire OBO Token
   const accessToken = await msalAcquireTokenOnBehalfOf(userToken);
 
@@ -91,7 +92,7 @@ export const getAzureUserInfo = async (userToken) => {
 
   return Object.freeze({
     uuid: apiResponse.id,
-    mail: apiResponse.mail,
+    email: apiResponse.mail,
     name: apiResponse.displayName,
     login: apiResponse.userPrincipalName,
   });
