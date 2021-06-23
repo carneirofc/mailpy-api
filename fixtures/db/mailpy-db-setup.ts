@@ -1,12 +1,14 @@
 import { Db } from "mongodb";
+
 const conditions = "conditions";
 const groups = "groups";
 const entries = "entries";
+
 const users = "users";
 const roles = "roles";
 const grants = "grants";
 
-export const collections: { [key: string]: string } = Object.freeze({
+export const databaseCollections: { [key: string]: string } = Object.freeze({
   conditions,
   entries,
   groups,
@@ -155,7 +157,6 @@ const createUsers = async (db: Db) => {
 };
 
 const createRoles = async (db: Db) => {
-  // console.log(`Creating ${roles}`);
   db.createCollection(roles, {
     validator: {
       $jsonSchema: {
@@ -184,7 +185,6 @@ const createRoles = async (db: Db) => {
 
 export default function makeMailpyDbSetup({ makeDb }: { makeDb: () => Promise<Db> }) {
   const createDatabase = async () => {
-    //   console.log(`Initialising database`);
     const db = await makeDb();
 
     // Authorization
@@ -198,18 +198,17 @@ export default function makeMailpyDbSetup({ makeDb }: { makeDb: () => Promise<Db
     await crateGroups(db); // Group of entries
   };
 
-  const resetDatabase = async () => {
-    //  console.log(`Reseting collections`);
+  const clearDatabase = async () => {
     const db = await makeDb();
 
-    for (let key in collections) {
-      // console.log(`Erasing collection ${collections[key]}`);
-      await db.dropCollection(collections[key]);
+    for (let key in databaseCollections) {
+      const res = await db.collection(key).deleteMany({});
+      console.log(`Delete ${key}`, res.deletedCount, res.result);
     }
   };
 
   return Object.freeze({
+    clearDatabase,
     createDatabase,
-    resetDatabase,
   });
 }

@@ -1,7 +1,7 @@
 import { Db, ObjectID } from "mongodb";
-import { collections } from "./mailpy-db-setup";
+import { databaseCollections } from "./mailpy-db-setup";
 
-const { conditions, entries, grants, groups, roles, users } = collections;
+const { conditions, entries, grants, groups, roles, users } = databaseCollections;
 
 export const conditionsEnum = {
   outOfrange: {
@@ -114,24 +114,27 @@ const listFromObjects = (objs: any) => {
 const insertConditions = async (db: Db) => {
   const collection = db.collection(conditions);
   const items = listFromObjects(conditionsEnum);
-  return collection.insertMany(items);
+
+  await collection.deleteMany({});
+  await collection.insertMany(items);
 };
 
 const insertGrants = async (db: Db) => {
   const collection = db.collection(grants);
   const items = listFromObjects(grantsEnum);
-  return await collection.insertMany(items);
+  await collection.deleteMany({});
+  await collection.insertMany(items);
 };
 
 const insertRoles = async (db: Db) => {
   const collection = db.collection(roles);
   const items = listFromObjects(defaultRoles);
-  return await collection.insertMany(items);
+  await collection.deleteMany({});
+  await collection.insertMany(items);
 };
 
 export default function makeMailpyDbData({ makeDb }: { makeDb: () => Promise<Db> }) {
   const insertData = async () => {
-    // console.log(`Initial database data`);
     const db = await makeDb();
 
     await insertConditions(db);
