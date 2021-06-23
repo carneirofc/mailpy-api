@@ -10,7 +10,8 @@
     "clean": "rm -rf build/",
     "dev": "nodemon --inspect --exec babel-node src/index.js",
     "start": "node build/index.js",
-    "test": "jest --verbose --detectOpenHandles src"
+    "test": "jest --verbose --detectOpenHandles src",
+    "test-watch": "jest --verbose --detectOpenHandles --watch src"
   },
   "repository": {
     "type": "git",
