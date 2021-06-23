@@ -1,4 +1,5 @@
-const makeGetGroups = ({ listGroups }) => {
+import { Controller } from "./comm-types";
+const makeGetGroups = ({ listGroups }: { listGroups: () => Promise<any> }): Controller => {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
