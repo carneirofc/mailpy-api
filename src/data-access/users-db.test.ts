@@ -1,34 +1,34 @@
-import makeDb, { closeDb } from "../../fixtures/db";
-import makeUsersDb, { UsersDb } from "./users-db";
-import makeMailpyDb, { MailpyDB } from "./mailpy-db";
-import makeMailpyDbSetup from "../../db/mailpy-db-setup";
-import { makeUser } from "../entities";
-
 import faker from "faker";
 
-import makeMailpyDbData, { conditionsEnum, grantsEnum, defaultRoles } from "../../db/mailpy-db-data";
+import makeUsersDb, { UsersDb } from "./users-db";
+import { makeUser } from "../entities";
 import { DatabaseDuplicatedKeyError } from "../helpers/errors";
 
-beforeAll(async () => {
-  const { createDatabase } = makeMailpyDbSetup({ makeDb });
-  await createDatabase();
-  const { insertData } = makeMailpyDbData({ makeDb });
-  await insertData();
-});
+import makeDb, { closeDb } from "../../fixtures/db/db";
+import { initApplicationDatabase } from "../../fixtures/db";
+import { grantsEnum, defaultRoles } from "../../fixtures/db/mailpy-db-data";
 
-afterAll(async () => {
-  const { resetDatabase } = makeMailpyDbSetup({ makeDb });
-  await resetDatabase();
-  await closeDb();
-});
+beforeAll(async () => await initApplicationDatabase({ makeDb }));
+
+afterAll(async () => await closeDb());
 
 describe("mailpy db", () => {
   let usersDb: UsersDb;
-  let mailpyDb: MailpyDB;
 
   beforeEach(async () => {
     usersDb = makeUsersDb({ makeDb });
-    mailpyDb = makeMailpyDb({ makeDb });
+  });
+
+  afterEach(async () => {});
+
+  it("find all grants", async () => {
+    const grants = await usersDb.findAllGrants();
+    expect(grants.length).toBe(Object.keys(grantsEnum).length);
+  });
+
+  it("find all roles", async () => {
+    const roles = await usersDb.findAllRoles();
+    expect(roles.length).toBe(Object.keys(defaultRoles).length);
   });
 
   it("insert user", async () => {
@@ -53,7 +53,7 @@ describe("mailpy db", () => {
     deleteResult = await usersDb.deleteByUUID(user.uuid);
     expect(deleteResult).toBe(0);
 
-    const roles = await mailpyDb.findAllRoles();
+    const roles = await usersDb.findAllRoles();
     result = await usersDb.insert({ ...user });
 
     user.roles.push(roles[0].id);

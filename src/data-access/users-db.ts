@@ -1,14 +1,16 @@
 import { ObjectID } from "mongodb";
 
-import { collections } from "../../db/mailpy-db-setup";
+import { databaseCollections } from "../../fixtures/db/mailpy-db-setup";
 import { DatabaseDuplicatedKeyError, InvalidPropertyError } from "../helpers/errors";
-import { User } from "../entities/user";
+import { Grant, Role, User } from "../entities/user";
 import { CodeDuplicatedKey } from "./error-codes";
 import { MakeDb } from "./interfaces";
 
-const { users } = collections;
+const { users, grants, roles } = databaseCollections;
 
 export interface UsersDb {
+  findAllGrants: () => Promise<Grant[]>;
+  findAllRoles: () => Promise<Role[]>;
   findGrants: (uuid: string) => Promise<Set<string> | null>;
   findByUUID: (uuid: string) => Promise<User | null>;
   update: (user: User) => Promise<boolean>;
@@ -20,6 +22,30 @@ export interface UsersDb {
 export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
   /** Get a set of grants that this user has */
   class UsersDbImpl implements UsersDb {
+    async findAllRoles() {
+      const db = await makeDb();
+      const result = await db
+        .collection(roles)
+        .aggregate([
+          {
+            $lookup: {
+              from: "grants",
+              localField: "grants",
+              foreignField: "_id",
+              as: "grants",
+            },
+          },
+        ])
+        .toArray();
+      return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
+    }
+
+    async findAllGrants() {
+      const db = await makeDb();
+      const result = await db.collection(grants).find({}).toArray();
+      return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
+    }
+
     async findGrants(uuid: string): Promise<Set<string> | null> {
       const db = await makeDb();
       const results = await db
