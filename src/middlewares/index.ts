@@ -1,10 +1,12 @@
-const routeNotFound = (req, res) => {
+import { RequestHandler, ErrorRequestHandler } from "express-serve-static-core";
+
+const routeNotFound: RequestHandler = (req, res) => {
   res.status(404).json({
     someBody: "Route not found or missing resource...",
   });
 };
 
-const exceptionHappened = (error, req, res, next) => {
+const exceptionHappened: ErrorRequestHandler = (error, req, res, next) => {
   if (error.status) {
     res.status(error.status);
   } else {
