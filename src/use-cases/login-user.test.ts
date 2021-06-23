@@ -1,10 +1,12 @@
+import faker from "faker";
+
 import makeDb from "../../fixtures/db";
-import makeMailpyDb from "../data-access/mailpy-db";
-import makeUsersDb from "../data-access/users-db";
+import makeMailpyDb, { MailpyDB } from "../data-access/mailpy-db";
+import makeUsersDb, { UsersDb } from "../data-access/users-db";
 import makeMailpyDbSetup from "../../db/mailpy-db-setup";
 
 import makeUserLogin from "./login-user";
-import faker from "faker";
+import { ExternalUserInfo } from "../entities/user";
 
 beforeAll(async () => {
   const { createDatabase } = makeMailpyDbSetup({ makeDb });
@@ -17,8 +19,8 @@ afterAll(async () => {
 });
 
 describe("perform a user login", () => {
-  let mailpyDb;
-  let usersDb;
+  let mailpyDb: MailpyDB;
+  let usersDb: UsersDb;
 
   beforeEach(async () => {
     mailpyDb = makeMailpyDb({ makeDb });
@@ -26,13 +28,14 @@ describe("perform a user login", () => {
   });
 
   it("user login", async () => {
-    const defaultFakeUser = Object.freeze({
+    const defaultFakeUser: ExternalUserInfo = Object.freeze({
       name: faker.name.findName(),
       email: faker.internet.email(),
-      uuid: faker.random.uuid(),
+      uuid: faker.datatype.uuid(),
+      login: faker.internet.userName(),
     });
 
-    const getExternalUserInfo = (authorization) => defaultFakeUser;
+    const getExternalUserInfo = async (authorization: string) => defaultFakeUser;
 
     const userLogin = makeUserLogin({ mailpyDb, usersDb, getExternalUserInfo });
     const user = await userLogin(faker.lorem.sentence());

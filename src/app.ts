@@ -15,9 +15,20 @@ import config from "./config";
 
 const API_ROOT = config.api.API_ROOT;
 
-const bearerStrategy = new BearerStrategy(strategyOptions, (token, done) => {
-  done(null, {}, token);
-});
+const bearerStrategy = new BearerStrategy(
+  {
+    clientID:strategyOptions.clientID,
+    identityMetadata: strategyOptions.identityMetadata,
+    issuer:strategyOptions.issuer, 
+    validateIssuer: strategyOptions.validateIssuer,
+    audience: strategyOptions.audience,
+    passReqToCallback:strategyOptions.passReqToCallback,
+    loggingNoPII: strategyOptions.loggingNoPII
+  },
+  (request, tokenPayload, callback) => {
+    callback(null, {}, tokenPayload);
+  }
+);
 
 const getLoggerLevel = () => {
   if (process.env.NODE_ENV === "production") {
