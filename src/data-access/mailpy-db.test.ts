@@ -1,4 +1,4 @@
-import makeDb from "../../fixtures/db";
+import makeDb, { closeDb } from "../../fixtures/db";
 import makeMailpyDb, { MailpyDB } from "./mailpy-db";
 import makeMailpyDbSetup from "../../db/mailpy-db-setup";
 
@@ -14,6 +14,7 @@ beforeAll(async () => {
 afterAll(async () => {
   const { resetDatabase } = makeMailpyDbSetup({ makeDb });
   await resetDatabase();
+  await closeDb();
 });
 
 describe("mailpy db", () => {

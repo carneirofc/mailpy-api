@@ -1,4 +1,4 @@
-import makeDb from "../../fixtures/db";
+import makeDb, { closeDb } from "../../fixtures/db";
 import makeUsersDb, { UsersDb } from "./users-db";
 import makeMailpyDb, { MailpyDB } from "./mailpy-db";
 import makeMailpyDbSetup from "../../db/mailpy-db-setup";
@@ -19,6 +19,7 @@ beforeAll(async () => {
 afterAll(async () => {
   const { resetDatabase } = makeMailpyDbSetup({ makeDb });
   await resetDatabase();
+  await closeDb();
 });
 
 describe("mailpy db", () => {
@@ -39,39 +40,34 @@ describe("mailpy db", () => {
     expect(result.name).toBe(user.name);
     expect(result.uuid).toBe(user.uuid);
     expect(result.email).toBe(user.email);
-    const rolesIds = result.roles.map(({ id }) => id);
 
-    expect(rolesIds).toStrictEqual(user.roles);
+    expect(result.roles).toStrictEqual(user.roles);
 
     await expect(async () => {
-      await usersDb.insert({
-        uuid: user.uuid,
-        name: user.name,
-        email: user.email,
-        roles: user.roles,
-      });
+      await usersDb.insert(user);
     }).rejects.toThrow(DatabaseDuplicatedKeyError);
 
-    result = await usersDb.deleteByUUID({ uuid: user.uuid });
-    expect(result).toBe(1);
+    let deleteResult = await usersDb.deleteByUUID(user.uuid);
+    expect(deleteResult).toBe(1);
 
-    result = await usersDb.deleteByUUID({ uuid: user.uuid });
-    expect(result).toBe(0);
+    deleteResult = await usersDb.deleteByUUID(user.uuid);
+    expect(deleteResult).toBe(0);
 
     const roles = await mailpyDb.findAllRoles();
     result = await usersDb.insert({ ...user });
 
     user.roles.push(roles[0].id);
     user.roles.push(roles[1].id);
-    result = await usersDb.update({ ...user });
-    expect(result).toBe(true);
 
-    result = await usersDb.findByUUID({ uuid: user.uuid });
+    let updateResult = await usersDb.update({ ...user });
+    expect(updateResult).toBe(true);
+
+    result = await usersDb.findByUUID(user.uuid);
 
     expect(result.roles.length).toBe(2);
     console.log(result);
 
-    result = await usersDb.deleteByUUID({ uuid: user.uuid });
-    expect(result).toBe(1);
+    deleteResult = await usersDb.deleteByUUID(user.uuid);
+    expect(deleteResult).toBe(1);
   });
 });
