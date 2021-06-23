@@ -1,7 +1,15 @@
 import { collections } from "../../db/mailpy-db-setup";
+import { MakeDb } from "./interfaces";
 const { conditions, entries, grants, groups, roles, users } = collections;
 
-export default function makeMailpyDb({ makeDb }) {
+export interface MailpyDB {
+  findAllConditions: () => Promise<any>;
+  findAllEntries: () => Promise<any>;
+  findAllGroups: () => Promise<any>;
+  findAllGrants: () => Promise<any>;
+  findAllRoles: () => Promise<any>;
+}
+export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
   const findAllRoles = async () => {
     const db = await makeDb();
     const result = await db

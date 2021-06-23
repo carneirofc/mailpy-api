@@ -1,5 +1,5 @@
 import makeDb from "../../fixtures/db";
-import makeMailpyDb from "./mailpy-db";
+import makeMailpyDb, { MailpyDB } from "./mailpy-db";
 import makeMailpyDbSetup from "../../db/mailpy-db-setup";
 
 import makeMailpyDbData, { conditionsEnum, grantsEnum, defaultRoles } from "../../db/mailpy-db-data";
@@ -17,7 +17,7 @@ afterAll(async () => {
 });
 
 describe("mailpy db", () => {
-  let mailpyDb;
+  let mailpyDb: MailpyDB;
 
   beforeEach(async () => {
     mailpyDb = makeMailpyDb({
