@@ -8,7 +8,7 @@ import passport from "passport";
 import { BearerStrategy } from "passport-azure-ad";
 
 import { strategyOptions } from "./config/azure";
-import middleware from "./midlewares";
+import middleware from "./middlewares";
 import indexRouter from "./routes/index";
 import apiRouter from "./routes/api";
 import config from "./config";
