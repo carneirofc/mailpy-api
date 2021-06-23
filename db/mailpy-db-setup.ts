@@ -1,3 +1,4 @@
+import { Db } from "mongodb";
 const conditions = "conditions";
 const groups = "groups";
 const entries = "entries";
@@ -5,7 +6,7 @@ const users = "users";
 const roles = "roles";
 const grants = "grants";
 
-export const collections = Object.freeze({
+export const collections: { [key: string]: string } = Object.freeze({
   conditions,
   entries,
   groups,
@@ -14,7 +15,7 @@ export const collections = Object.freeze({
   grants,
 });
 
-const createConditions = async (db) => {
+const createConditions = async (db: Db) => {
   // console.log(`Creating ${conditions}`);
   db.createCollection(conditions, {
     validator: {
@@ -38,7 +39,7 @@ const createConditions = async (db) => {
   await collection.createIndex({ name: 1 }, { unique: true });
 };
 
-const createGrants = async (db) => {
+const createGrants = async (db: Db) => {
   // console.log(`Creating ${grants}`);
   await db.createCollection(grants, {
     validator: {
@@ -62,7 +63,7 @@ const createGrants = async (db) => {
   await collection.createIndex({ name: 1 }, { unique: true });
 };
 
-const crateGroups = async (db) => {
+const crateGroups = async (db: Db) => {
   // console.log(`Creating ${groups}`);
   await db.createCollection(groups, {
     validator: {
@@ -86,7 +87,7 @@ const crateGroups = async (db) => {
   await collection.createIndex({ name: 1 }, { unique: true });
 };
 
-const createEntries = async (db) => {
+const createEntries = async (db: Db) => {
   // console.log(`Creating ${entries}`);
   db.createCollection(entries, {
     validator: {
@@ -121,7 +122,7 @@ const createEntries = async (db) => {
   await collection.createIndex({ pvname: 1, emails: 1, condition: 1, alarm_values: 1 }, { unique: true });
 };
 
-const createUsers = async (db) => {
+const createUsers = async (db: Db) => {
   // console.log(`Creating ${users}`);
   db.createCollection(users, {
     validator: {
@@ -153,7 +154,7 @@ const createUsers = async (db) => {
   await collection.createIndex({ uuid: 1 }, { unique: true });
 };
 
-const createRoles = async (db) => {
+const createRoles = async (db: Db) => {
   // console.log(`Creating ${roles}`);
   db.createCollection(roles, {
     validator: {
@@ -181,7 +182,7 @@ const createRoles = async (db) => {
   await collection.createIndex({ name: 1 }, { unique: true });
 };
 
-export default function makeMailpyDbSetup({ makeDb }) {
+export default function makeMailpyDbSetup({ makeDb }: { makeDb: () => Promise<Db> }) {
   const createDatabase = async () => {
     //   console.log(`Initialising database`);
     const db = await makeDb();

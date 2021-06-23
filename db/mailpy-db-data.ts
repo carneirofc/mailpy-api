@@ -1,4 +1,4 @@
-import { ObjectID } from "mongodb";
+import { Db, ObjectID } from "mongodb";
 import { collections } from "./mailpy-db-setup";
 
 const { conditions, entries, grants, groups, roles, users } = collections;
@@ -74,7 +74,12 @@ export const grantsEnum = {
   },
 };
 
-export const defaultRoles = {
+interface Role {
+  name: string;
+  desc: string;
+  grants: ObjectID[];
+}
+export const defaultRoles: { [key: string]: Role } = {
   Admin: {
     name: "Admin",
     desc: "Full control over the system",
@@ -96,7 +101,7 @@ export const defaultRoles = {
   },
 };
 
-const listFromObjects = (objs) => {
+const listFromObjects = (objs: any) => {
   /** Given an object where the key is the corresponding entry name, obtain a list */
   const items = [];
   for (let name in objs) {
@@ -106,25 +111,25 @@ const listFromObjects = (objs) => {
   return items;
 };
 
-const insertConditions = async (db) => {
+const insertConditions = async (db: Db) => {
   const collection = db.collection(conditions);
   const items = listFromObjects(conditionsEnum);
   return collection.insertMany(items);
 };
 
-const insertGrants = async (db) => {
+const insertGrants = async (db: Db) => {
   const collection = db.collection(grants);
   const items = listFromObjects(grantsEnum);
   return await collection.insertMany(items);
 };
 
-const insertRoles = async (db) => {
+const insertRoles = async (db: Db) => {
   const collection = db.collection(roles);
   const items = listFromObjects(defaultRoles);
   return await collection.insertMany(items);
 };
 
-export default function makeMailpyDbData({ makeDb }) {
+export default function makeMailpyDbData({ makeDb }: { makeDb: () => Promise<Db> }) {
   const insertData = async () => {
     // console.log(`Initial database data`);
     const db = await makeDb();
