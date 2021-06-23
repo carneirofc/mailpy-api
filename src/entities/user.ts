@@ -1,5 +1,17 @@
 import { InvalidPropertyError } from "../helpers/errors";
 
+export interface Grant {
+  name: string;
+  desc: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  desc: string;
+  grants: Grant[];
+}
+
 export interface ExternalUserInfo {
   uuid: string;
   email: string;
