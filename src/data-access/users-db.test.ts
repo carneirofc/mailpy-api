@@ -1,6 +1,6 @@
 import makeDb from "../../fixtures/db";
-import makeUsersDb from "./users-db";
-import makeMailpyDb from "./mailpy-db";
+import makeUsersDb, { UsersDb } from "./users-db";
+import makeMailpyDb, { MailpyDB } from "./mailpy-db";
 import makeMailpyDbSetup from "../../db/mailpy-db-setup";
 import { makeUser } from "../entities";
 
@@ -22,8 +22,8 @@ afterAll(async () => {
 });
 
 describe("mailpy db", () => {
-  let usersDb;
-  let mailpyDb;
+  let usersDb: UsersDb;
+  let mailpyDb: MailpyDB;
 
   beforeEach(async () => {
     usersDb = makeUsersDb({ makeDb });
@@ -33,14 +33,9 @@ describe("mailpy db", () => {
   it("insert user", async () => {
     const user = makeUser({
       name: faker.name.findName(),
-      uuid: faker.random.uuid(),
+      uuid: faker.datatype.uuid(),
     });
-    let result = await usersDb.insert({
-      uuid: user.uuid,
-      name: user.name,
-      email: user.email,
-      roles: user.roles,
-    });
+    let result = await usersDb.insert(user);
     expect(result.name).toBe(user.name);
     expect(result.uuid).toBe(user.uuid);
     expect(result.email).toBe(user.email);
