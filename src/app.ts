@@ -17,13 +17,13 @@ const API_ROOT = config.api.API_ROOT;
 
 const bearerStrategy = new BearerStrategy(
   {
-    clientID:strategyOptions.clientID,
+    clientID: strategyOptions.clientID,
     identityMetadata: strategyOptions.identityMetadata,
-    issuer:strategyOptions.issuer, 
+    issuer: strategyOptions.issuer,
     validateIssuer: strategyOptions.validateIssuer,
     audience: strategyOptions.audience,
-    passReqToCallback:strategyOptions.passReqToCallback,
-    loggingNoPII: strategyOptions.loggingNoPII
+    passReqToCallback: strategyOptions.passReqToCallback,
+    loggingNoPII: strategyOptions.loggingNoPII,
   },
   (request, tokenPayload, callback) => {
     callback(null, {}, tokenPayload);
