@@ -66,7 +66,6 @@ const createGrants = async (db: Db) => {
 };
 
 const crateGroups = async (db: Db) => {
-  // console.log(`Creating ${groups}`);
   await db.createCollection(groups, {
     validator: {
       $jsonSchema: {
@@ -90,7 +89,6 @@ const crateGroups = async (db: Db) => {
 };
 
 const createEntries = async (db: Db) => {
-  // console.log(`Creating ${entries}`);
   db.createCollection(entries, {
     validator: {
       $jsonSchema: {
