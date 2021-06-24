@@ -1,30 +1,31 @@
 import { InvalidPropertyError } from "../helpers/errors";
 
-export interface Grant {
-  name: string;
-  desc: string;
-}
-
-export interface Role {
-  id: string;
-  name: string;
-  desc: string;
-  grants: Grant[];
-}
-
-export interface ExternalUserInfo {
+export type ExternalUserInfo = {
   uuid: string;
   email: string;
   name: string;
   login: string;
-}
+};
+
+export type Grant = {
+  id: string;
+  name: string;
+  desc: string;
+};
+
+export type Role = {
+  id: string;
+  name: string;
+  desc: string;
+  grants: Grant[];
+};
 
 export type User = {
   id: string | undefined;
   name: string;
   uuid: string;
   email: string;
-  roles: string[];
+  roles: Role[];
 };
 
 export default function buildMakeUser({}) {
@@ -39,7 +40,7 @@ export default function buildMakeUser({}) {
     name: string;
     uuid: string;
     email?: string;
-    roles?: any[];
+    roles?: Role[];
   }): User {
     if (!uuid) {
       throw new InvalidPropertyError("UUID is required");
@@ -56,8 +57,9 @@ export default function buildMakeUser({}) {
     email = email.replace(/\s+/g, "");
 
     if (roles === null || roles === undefined) {
-      throw new InvalidPropertyError("Roles is required");
+      roles = [];
     }
+
     if (!(roles instanceof Array)) {
       throw new InvalidPropertyError("Roles is required to be an array");
     }
