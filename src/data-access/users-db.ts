@@ -5,26 +5,45 @@ import { DatabaseDuplicatedKeyError, InvalidPropertyError } from "../helpers/err
 import { Grant, Role, User } from "../entities/user";
 import { CodeDuplicatedKey } from "./error-codes";
 import { MakeDb } from "./interfaces";
+import { deepCopy } from "../helpers/deep-copy";
 
 const { users, grants, roles } = databaseCollections;
 
 export interface UsersDb {
   findAllGrants: () => Promise<Grant[]>;
   findAllRoles: () => Promise<Role[]>;
-  findGrants: (uuid: string) => Promise<Set<string> | null>;
-  findByUUID: (uuid: string) => Promise<User | null>;
-  update: (user: User) => Promise<boolean>;
-  insert: (user: User) => Promise<User | null>;
-  delete: (user: User) => Promise<number>;
-  deleteByUUID: (uuid: string) => Promise<number>;
+
+  findUserGrants: (uuid: string) => Promise<Set<string> | null>;
+  findUserByUUID: (uuid: string) => Promise<User | null>;
+
+  updateUser: (user: User) => Promise<boolean>;
+  insertUser: (user: User) => Promise<User | null>;
+  deleteUser: (user: User) => Promise<number>;
+  deleteUserByUUID: (uuid: string) => Promise<number>;
 }
 
 export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
   /** Get a set of grants that this user has */
+  type GrantJsonObj = { _id: ObjectID; name: string; desc: string };
+  type RoleJsonObj = { _id: ObjectID; name: string; desc: string; grants: GrantJsonObj[] };
+  type UserJsonObj = { _id: ObjectID; name: string; uuid: string; email: string; roles: RoleJsonObj[] };
+
+  const parseGrant = ({ _id, name, desc }: GrantJsonObj): Grant => {
+    return { id: _id.toString(), name, desc };
+  };
+  const parseRole = ({ _id, name, desc, grants }: RoleJsonObj): Role => {
+    const validGrants = grants.filter((grant) => grant._id !== undefined);
+    return { id: _id.toString(), name, desc, grants: validGrants.map(parseGrant) };
+  };
+  const parseUser = ({ _id, name, email, roles, uuid }: UserJsonObj): User => {
+    const validRoles = roles.filter((role) => role._id !== undefined);
+    return { id: _id.toString(), name, email, uuid, roles: validRoles.map(parseRole) };
+  };
+
   class UsersDbImpl implements UsersDb {
-    async findAllRoles() {
+    async findAllRoles(): Promise<Role[]> {
       const db = await makeDb();
-      const result = await db
+      const result: RoleJsonObj[] = await db
         .collection(roles)
         .aggregate([
           {
@@ -37,16 +56,16 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
           },
         ])
         .toArray();
-      return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
+      return result.map(parseRole);
     }
 
-    async findAllGrants() {
+    async findAllGrants(): Promise<Grant[]> {
       const db = await makeDb();
-      const result = await db.collection(grants).find({}).toArray();
-      return result.map(({ _id: id, ...data }) => ({ id: id.toString(), ...data }));
+      const result: GrantJsonObj[] = await db.collection(grants).find({}).toArray();
+      return result.map(parseGrant);
     }
 
-    async findGrants(uuid: string): Promise<Set<string> | null> {
+    async findUserGrants(uuid: string): Promise<Set<string> | null> {
       const db = await makeDb();
       const results = await db
         .collection(users)
@@ -89,41 +108,41 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       return null;
     }
 
-    async findByUUID(uuid: string): Promise<User | null> {
+    async findUserByUUID(uuid: string): Promise<User> {
       /** using aggregate to also get the roles (left join) */
       const db = await makeDb();
       const results = await db
         .collection(users)
         .aggregate([
           { $match: { uuid: uuid } },
+          { $lookup: { from: "roles", localField: "roles", foreignField: "_id", as: "roles" } },
+          { $unwind: { path: "$roles", preserveNullAndEmptyArrays: true } },
+          { $lookup: { from: "grants", localField: "roles.grants", foreignField: "_id", as: "roles.grants" } },
           {
-            $lookup: {
-              from: "roles",
-              localField: "roles",
-              foreignField: "_id",
-              as: "roles",
+            $group: {
+              _id: "$_id",
+              uuid: { $first: "$uuid" },
+              email: { $first: "$email" },
+              name: { $first: "$name" },
+              desc: { $first: "$desc" },
+              roles: { $push: "$roles" },
             },
           },
         ])
         .toArray();
 
-      if (results.length === 1) {
-        const result = results[0];
-        return Object.freeze({
-          id: result._id.toString(),
-          uuid: result.uuid,
-          name: result.name,
-          email: result.email,
-          roles: result.roles,
-          grants: result.grants,
-        });
+      if (results.length !== 1) {
+        return null;
       }
-      return null;
+
+      const result: UserJsonObj = results[0];
+
+      return Object.freeze(parseUser(result));
     }
 
-    async update(user: User): Promise<boolean> {
+    async updateUser(user: User): Promise<boolean> {
       const db = await makeDb();
-      const rolesId = user.roles.map((role) => new ObjectID(role));
+      const rolesId = user.roles.map((role) => new ObjectID(role.id));
       const result = await db.collection(users).updateOne(
         { uuid: user.uuid },
         {
@@ -137,9 +156,9 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       return result.result.ok === 1 && result.result.n === 1;
     }
 
-    async insert(user: User): Promise<User> {
+    async insertUser(user: User): Promise<User> {
       const db = await makeDb();
-      const rolesId = user.roles.map((id) => new ObjectID(id));
+      const rolesId = user.roles.map((role) => new ObjectID(role.id));
       const result = await db
         .collection(users)
         .insertOne({
@@ -156,12 +175,13 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
           throw error;
         });
 
-      // Return the inserted object
-      const { _id, ...data } = result.ops[0];
-      return { id: _id.toString(), ...data, roles: data.roles.map((id: any) => id.toString()) };
+      // Return the inserted object with the new id
+      const { _id } = result.ops[0];
+      const copyUser = deepCopy(user);
+      return { ...copyUser, id: _id.toString() };
     }
 
-    async deleteByUUID(uuid: string): Promise<number> {
+    async deleteUserByUUID(uuid: string): Promise<number> {
       if (!uuid) {
         throw new InvalidPropertyError("UUI cannot be null");
       }
@@ -172,9 +192,9 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       return result.deletedCount;
     }
 
-    async delete(user: User): Promise<number> {
+    async deleteUser(user: User): Promise<number> {
       const uuid = user.uuid;
-      return await this.deleteByUUID(uuid);
+      return await this.deleteUserByUUID(uuid);
     }
   }
   return new UsersDbImpl();
