@@ -13,9 +13,7 @@ class MongoEnvironment extends NodeEnvironment {
   }
 
   async setup() {
-    const globalConfig = JSON.parse(
-      fs.readFileSync(globalConfigPath, "utf-8")
-    );
+    const globalConfig = JSON.parse(fs.readFileSync(globalConfigPath, "utf-8"));
 
     this.global.__MONGO_URI__ = globalConfig.mongoUri;
     this.global.__MONGO_DB_NAME__ = globalConfig.mongoDBName;
@@ -31,6 +29,5 @@ class MongoEnvironment extends NodeEnvironment {
     super.runScript(script);
   }
 }
-
 
 module.exports = MongoEnvironment;
