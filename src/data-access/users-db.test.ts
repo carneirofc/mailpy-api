@@ -7,6 +7,7 @@ import { DatabaseDuplicatedKeyError } from "../helpers/errors";
 import makeDb, { closeDb } from "../../fixtures/db/db";
 import { initApplicationDatabase } from "../../fixtures/db";
 import { grantsEnum, defaultRoles } from "../../fixtures/db/mailpy-db-data";
+import { expectCt } from "helmet";
 
 beforeAll(async () => await initApplicationDatabase({ makeDb }));
 
@@ -32,42 +33,59 @@ describe("mailpy db", () => {
   });
 
   it("insert user", async () => {
-    const user = makeUser({
+    const tmpUser = makeUser({
       name: faker.name.findName(),
       uuid: faker.datatype.uuid(),
     });
-    let result = await usersDb.insert(user);
-    expect(result.name).toBe(user.name);
-    expect(result.uuid).toBe(user.uuid);
-    expect(result.email).toBe(user.email);
 
-    expect(result.roles).toStrictEqual(user.roles);
+    // create a fresh user
+    const newUser = await usersDb.insertUser(tmpUser);
+    expect(newUser.name).toBe(tmpUser.name);
+    expect(newUser.uuid).toBe(tmpUser.uuid);
+    expect(newUser.email).toBe(tmpUser.email);
+    expect(newUser.roles).toStrictEqual(tmpUser.roles);
+    expect(newUser.id).toBeDefined();
 
+    // find the user from db
+    const foundUser = await usersDb.findUserByUUID(newUser.uuid);
+    expect(foundUser).toBeDefined();
+    expect(foundUser.id).toBe(newUser.id);
+    expect(foundUser.uuid).toBe(newUser.uuid);
+    expect(foundUser).toStrictEqual(newUser);
+
+    // Cannot insert the same user
     await expect(async () => {
-      await usersDb.insert(user);
+      await usersDb.insertUser(tmpUser);
     }).rejects.toThrow(DatabaseDuplicatedKeyError);
 
-    let deleteResult = await usersDb.deleteByUUID(user.uuid);
-    expect(deleteResult).toBe(1);
+    // delete the user
+    let deleteCount = await usersDb.deleteUserByUUID(tmpUser.uuid);
+    expect(deleteCount).toBe(1);
 
-    deleteResult = await usersDb.deleteByUUID(user.uuid);
-    expect(deleteResult).toBe(0);
+    deleteCount = await usersDb.deleteUserByUUID(tmpUser.uuid);
+    expect(deleteCount).toBe(0);
+  });
 
+  it("insert user with roles", async () => {
     const roles = await usersDb.findAllRoles();
-    result = await usersDb.insert({ ...user });
 
-    user.roles.push(roles[0].id);
-    user.roles.push(roles[1].id);
+    const tmpRoleUser = makeUser({
+      name: faker.name.findName(),
+      uuid: faker.datatype.uuid(),
+    });
 
-    let updateResult = await usersDb.update({ ...user });
+    tmpRoleUser.roles.push(roles[0]);
+    const newRoleUser = await usersDb.insertUser(tmpRoleUser);
+    expect(newRoleUser.roles.length).toBe(1);
+
+    newRoleUser.roles.push(roles[1]);
+    let updateResult = await usersDb.updateUser(newRoleUser);
     expect(updateResult).toBe(true);
 
-    result = await usersDb.findByUUID(user.uuid);
+    const foundNewRoleUser = await usersDb.findUserByUUID(newRoleUser.uuid);
+    expect(foundNewRoleUser.roles.length).toBe(2);
 
-    expect(result.roles.length).toBe(2);
-    console.log(result);
-
-    deleteResult = await usersDb.deleteByUUID(user.uuid);
-    expect(deleteResult).toBe(1);
+    const deleteCount = await usersDb.deleteUserByUUID(foundNewRoleUser.uuid);
+    expect(deleteCount).toBe(1);
   });
 });
