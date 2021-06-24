@@ -12,12 +12,12 @@ export default function makeUserLogin({
   usersDb: UsersDb;
   getExternalUserInfo: (token: string) => Promise<ExternalUserInfo>;
 }) {
-  return async function (authToken: string) {
+  return async function (authToken: string): Promise<User> {
     // Get information from azure
     const externalInfo = await getExternalUserInfo(authToken);
 
     // Check if the user exists
-    let result: User = await usersDb.findByUUID(externalInfo.uuid);
+    let result: User = await usersDb.findUserByUUID(externalInfo.uuid);
 
     if (!result) {
       // Crete a user with no roles
@@ -28,7 +28,7 @@ export default function makeUserLogin({
         roles: [],
       });
       // Insert user and get result with the new id
-      result = await usersDb.insert(user);
+      result = await usersDb.insertUser(user);
     }
 
     // Return user info

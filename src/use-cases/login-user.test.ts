@@ -40,6 +40,8 @@ describe("perform a user login", () => {
     expect(user.roles.length).toBe(0);
     expect(user.id).not.toBeNull();
 
-    await userLogin(faker.lorem.sentence());
+    const loggedUser = await userLogin(faker.lorem.sentence());
+    expect(loggedUser.uuid).toBe(user.uuid);
+    expect(loggedUser.id).toBe(user.id);
   });
 });
