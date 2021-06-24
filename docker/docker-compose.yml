@@ -9,7 +9,6 @@ services:
       MONGODB_URI: mongodb://localhost:27017/mailpy-db
       NODE_ENV: production
     volumes:
-      - '../.:/app'
+      - "../.:/app"
     ports:
       - 1337:1337
-
