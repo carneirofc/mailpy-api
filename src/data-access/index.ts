@@ -8,11 +8,7 @@ const uri = config.MONGODB_URI;
 const options = config.options;
 
 console.info("Creating Mongodb client...");
-const client = new MongoClient(uri, {
-  ...options,
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-});
+const client = new MongoClient(uri, options);
 
 export const makeDb = async () => {
   if (!client.isConnected()) {

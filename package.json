@@ -7,6 +7,7 @@
   "main": "src/index.js",
   "scripts": {
     "build": "npm run build-ts && npm run lint && npm run copy-static-assets",
+    "build-db": "ts-node initMongoDB.ts",
     "build-ts": "tsc",
     "clean": "rm -rf build/",
     "copy-static-assets": "ts-node copyStaticAssets.ts",
