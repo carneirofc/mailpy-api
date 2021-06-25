@@ -1,5 +1,6 @@
 import { Db, ObjectID } from "mongodb";
 import { databaseCollections } from "./mailpy-db-setup";
+import { GrantName } from "../../src/entities";
 
 const { conditions, entries, grants, groups, roles, users } = databaseCollections;
 
@@ -34,42 +35,42 @@ export const conditionsEnum = {
 export const grantsEnum = {
   entriesDelete: {
     _id: new ObjectID(),
-    name: "entries.delete",
+    name: GrantName.ENTRIES_DELETE,
     desc: "Delete an entry",
   },
   entriesInsert: {
     _id: new ObjectID(),
-    name: "entries.insert",
+    name: GrantName.ENTRIES_INSERT,
     desc: "Insert a new entry",
   },
   entriesUpdate: {
     _id: new ObjectID(),
-    name: "entries.update",
+    name: GrantName.ENTRIES_UPDATE,
     desc: "Update every aspect of an entry",
   },
   groupsDelete: {
     _id: new ObjectID(),
-    name: "groups.delete",
+    name: GrantName.GROUPS_DELETE,
     desc: "Delete a group",
   },
   groupsDisable: {
     _id: new ObjectID(),
-    name: "groups.disable",
+    name: GrantName.GROUPS_DISABLE,
     desc: "Disable monitoring for a group",
   },
   groupsInsert: {
     _id: new ObjectID(),
-    name: "groups.insert",
+    name: GrantName.GROUPS_INSERT,
     desc: "Add groups",
   },
   groupsUpdate: {
     _id: new ObjectID(),
-    name: "groups.update",
+    name: GrantName.GROUPS_UPDATE,
     desc: "Update every aspect of a group",
   },
   usersUpdate: {
     _id: new ObjectID(),
-    name: "users.update",
+    name: GrantName.USERS_UPDATE,
     desc: "Update user attributes",
   },
 };

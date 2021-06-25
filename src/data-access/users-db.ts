@@ -2,7 +2,7 @@ import { ObjectID } from "mongodb";
 
 import { databaseCollections } from "../../fixtures/db/mailpy-db-setup";
 import { DatabaseDuplicatedKeyError, InvalidPropertyError } from "../helpers/errors";
-import { Grant, Role, User } from "../entities/user";
+import { Grant, GrantName, Role, User } from "../entities/user";
 import { CodeDuplicatedKey } from "./error-codes";
 import { MakeDb } from "./interfaces";
 import { deepCopy } from "../helpers/deep-copy";
@@ -13,7 +13,7 @@ export interface UsersDb {
   findAllGrants: () => Promise<Grant[]>;
   findAllRoles: () => Promise<Role[]>;
 
-  findUserGrants: (uuid: string) => Promise<Set<string> | null>;
+  findUserGrants: (uuid: string) => Promise<Set<Grant> | null>;
   findUserByUUID: (uuid: string) => Promise<User | null>;
 
   updateUser: (user: User) => Promise<boolean>;
@@ -24,7 +24,7 @@ export interface UsersDb {
 
 export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
   /** Get a set of grants that this user has */
-  type GrantJsonObj = { _id: ObjectID; name: string; desc: string };
+  type GrantJsonObj = { _id: ObjectID; name: GrantName; desc: string };
   type RoleJsonObj = { _id: ObjectID; name: string; desc: string; grants: GrantJsonObj[] };
   type UserJsonObj = { _id: ObjectID; name: string; uuid: string; email: string; roles: RoleJsonObj[] };
 
@@ -65,7 +65,7 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       return result.map(parseGrant);
     }
 
-    async findUserGrants(uuid: string): Promise<Set<string> | null> {
+    async findUserGrants(uuid: string): Promise<Set<Grant> | null> {
       const db = await makeDb();
       const results = await db
         .collection(users)
@@ -76,36 +76,28 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
               from: "roles",
               localField: "roles",
               foreignField: "_id",
-              as: "roles",
+              as: "roles_lookup",
             },
           },
           {
             $lookup: {
               from: "grants",
-              localField: "roles.grants",
+              localField: "roles_lookup.grants",
               foreignField: "_id",
               as: "grants",
-            },
-          },
-          {
-            $project: {
-              "roles.grants": 0,
-              "roles._id": 0,
-              "roles.desc": 0,
-              "grants.desc": 0,
             },
           },
         ])
         .toArray();
 
-      if (results.length === 1) {
-        const grants = new Set<string>();
-        results[0].grants.forEach((grant: { desc: string; name: string; _id: ObjectID | undefined }) => {
-          grants.add(grant.name);
-        });
-        return grants;
+      if (results.length !== 1) {
+        return null;
       }
-      return null;
+
+      const grants: GrantJsonObj[] = results[0].grants;
+      const grantsSet = new Set<Grant>();
+      grants.forEach((grant) => grantsSet.add(parseGrant(grant)));
+      return grantsSet;
     }
 
     async findUserByUUID(uuid: string): Promise<User> {

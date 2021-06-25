@@ -1,7 +1,7 @@
 import faker from "faker";
 
 import makeUsersDb, { UsersDb } from "./users-db";
-import { makeUser } from "../entities";
+import { makeUser, Grant } from "../entities";
 import { DatabaseDuplicatedKeyError } from "../helpers/errors";
 
 import makeDb, { closeDb } from "../../fixtures/db/db";
@@ -87,5 +87,22 @@ describe("mailpy db", () => {
 
     const deleteCount = await usersDb.deleteUserByUUID(foundNewRoleUser.uuid);
     expect(deleteCount).toBe(1);
+  });
+
+  it("find grants", async () => {
+    const roles = await usersDb.findAllRoles();
+
+    const tmpUser = makeUser({
+      name: faker.name.findName(),
+      uuid: faker.datatype.uuid(),
+    });
+
+    tmpUser.roles.push(roles[0]);
+    tmpUser.roles.push(roles[1]);
+
+    const newRoleUser = await usersDb.insertUser(tmpUser);
+    expect(newRoleUser.roles.length).toBe(2);
+
+    const grants = await usersDb.findUserGrants(tmpUser.uuid);
   });
 });

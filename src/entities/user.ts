@@ -1,5 +1,16 @@
 import { InvalidPropertyError } from "../helpers/errors";
 
+export enum GrantName {
+  ENTRIES_DELETE = "entries.delete",
+  ENTRIES_INSERT = "entries.insert",
+  ENTRIES_UPDATE = "entries.update",
+  GROUPS_DELETE = "groups.delete",
+  GROUPS_DISABLE = "groups.disable",
+  GROUPS_INSERT = "groups.insert",
+  GROUPS_UPDATE = "groups.update",
+  USERS_UPDATE = "users.update",
+}
+
 export type ExternalUserInfo = {
   uuid: string;
   email: string;
@@ -9,7 +20,7 @@ export type ExternalUserInfo = {
 
 export type Grant = {
   id: string;
-  name: string;
+  name: GrantName;
   desc: string;
 };
 
