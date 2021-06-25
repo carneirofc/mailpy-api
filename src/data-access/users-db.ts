@@ -2,7 +2,7 @@ import { ObjectID } from "mongodb";
 
 import { databaseCollections } from "../../fixtures/db/mailpy-db-setup";
 import { DatabaseDuplicatedKeyError, InvalidPropertyError } from "../helpers/errors";
-import { Grant, GrantName, Role, User } from "../entities/user";
+import { Grant, GrantName, GrantNameHas, Role, User } from "../entities/user";
 import { CodeDuplicatedKey } from "./error-codes";
 import { MakeDb } from "./interfaces";
 import { deepCopy } from "../helpers/deep-copy";
@@ -24,12 +24,15 @@ export interface UsersDb {
 
 export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
   /** Get a set of grants that this user has */
-  type GrantJsonObj = { _id: ObjectID; name: GrantName; desc: string };
+  type GrantJsonObj = { _id: ObjectID; name: string; desc: string };
   type RoleJsonObj = { _id: ObjectID; name: string; desc: string; grants: GrantJsonObj[] };
   type UserJsonObj = { _id: ObjectID; name: string; uuid: string; email: string; roles: RoleJsonObj[] };
 
   const parseGrant = ({ _id, name, desc }: GrantJsonObj): Grant => {
-    return { id: _id.toString(), name, desc };
+    if (!GrantNameHas(name)) {
+      throw "Invalid Grant name from database";
+    }
+    return { id: _id.toString(), name: name as GrantName, desc };
   };
   const parseRole = ({ _id, name, desc, grants }: RoleJsonObj): Role => {
     const validGrants = grants.filter((grant) => grant._id !== undefined);
