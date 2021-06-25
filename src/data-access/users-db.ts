@@ -30,7 +30,7 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
 
   const parseGrant = ({ _id, name, desc }: GrantJsonObj): Grant => {
     if (!GrantNameHas(name)) {
-      throw "Invalid Grant name from database";
+      throw new InvalidPropertyError("Invalid Grant name from database");
     }
     return { id: _id.toString(), name: name as GrantName, desc };
   };
