@@ -10,6 +10,11 @@ export enum GrantName {
   GROUPS_UPDATE = "groups.update",
   USERS_UPDATE = "users.update",
 }
+export const GrantNameHas = (value: string): boolean => {
+  const res = Object.values(GrantName).includes(value as any);
+  // console.log(`GrantNameHas: value '${value}' in 'GrantName' = ${res}`);
+  return res;
+};
 
 export type ExternalUserInfo = {
   uuid: string;
