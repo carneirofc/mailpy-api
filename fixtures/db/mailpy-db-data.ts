@@ -1,33 +1,33 @@
 import { Db, ObjectID } from "mongodb";
 import { databaseCollections } from "./mailpy-db-setup";
-import { GrantName } from "../../src/entities";
+import { GrantName, ConditionName } from "../../src/entities";
 
 const { conditions, entries, grants, groups, roles, users } = databaseCollections;
 
 export const conditionsEnum = {
   outOfrange: {
     _id: new ObjectID(),
-    name: "out of range",
+    name: ConditionName.OUT_OF_RANGE,
     desc: "Must remain within the specified range.",
   },
   superiorThan: {
     _id: new ObjectID(),
-    name: "superior than",
+    name: ConditionName.SUPERIOR_THAN,
     desc: "Must remain superior than.",
   },
   inferiorThan: {
     _id: new ObjectID(),
-    name: "inferior than",
+    name: ConditionName.INFERIOR_THAN,
     desc: "Must remain inferior than.",
   },
   increasingStep: {
     _id: new ObjectID(),
-    name: "increasing step",
+    name: ConditionName.INCREASING_STEP,
     desc: "Each increasing step triggers an alarm.",
   },
   decreasingStep: {
     _id: new ObjectID(),
-    name: "decreasing step",
+    name: ConditionName.DECREASING_STEP,
     desc: "Each decreasing step triggers an alarm.",
   },
 };
