@@ -15,7 +15,7 @@
     "lint": "tsc --noEmit",
     "start": "node build/src/index.js",
     "test": "jest --verbose --detectOpenHandles src",
-    "test-watch": "jest --verbose --detectOpenHandles --watch src"
+    "test-watch": "jest --verbose --detectOpenHandles --onlyChanged --watch src"
   },
   "repository": {
     "type": "git",
