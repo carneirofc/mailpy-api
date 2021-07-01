@@ -22,9 +22,11 @@ export interface Condition {
 export interface Group {
   name: string;
   desc: string;
+  enabled: boolean;
 }
 
 export interface Entry {
+  id: string;
   condition: Condition;
   email_timeout: number;
   alarm_values: string; // @todo: Parse string from db into a valid object ...
@@ -46,6 +48,7 @@ export function buildMakeCondition({}) {
 
 export function buildMakeEntry({}) {
   interface MakeEntry {
+    id?: string;
     alarm_values: string;
     condition: Condition;
     email_timeout: number;
@@ -119,18 +122,32 @@ export function buildMakeEntry({}) {
         throw new InvalidPropertyError(`Condition "${stringValue}" is invalid`);
     }
   };
-  return function makeEntry(data: MakeEntry): Entry {
+
+  return function makeEntry({ id, emails, ...data }: MakeEntry): Entry {
     if (!isAlarmValueValid(data.alarm_values, data.condition.name)) {
       throw new InvalidPropertyError(
         `Failed to create entry, "${data.alarm_values}" is not compatible with the condition "${data.condition.name}"`
       );
     }
-    return { ...data };
+
+    const noSpaceEmails = emails.map((value) => value.replace(/\s+/g, ""));
+    const notEmptyEmails = noSpaceEmails.filter((value) => value.length !== 0);
+    const uniqueEmails = notEmptyEmails.filter((value, index) => notEmptyEmails.indexOf(value) === index);
+
+    return { id: id === undefined ? "" : id, emails: uniqueEmails, ...data };
   };
 }
 
 export function buildMakeGroup({}) {
-  return function makeGroup({ name, desc = "" }: { name: string; desc?: string }): Group {
+  return function makeGroup({
+    name,
+    desc = "",
+    enabled = true,
+  }: {
+    name: string;
+    desc?: string;
+    enabled?: boolean;
+  }): Group {
     if (!name || name.replace(/\s+/g, "").length === 0) {
       throw new InvalidPropertyError("Name cannot be empty");
     }
@@ -140,6 +157,7 @@ export function buildMakeGroup({}) {
     return Object.freeze({
       name,
       desc,
+      enabled,
     });
   };
 }
