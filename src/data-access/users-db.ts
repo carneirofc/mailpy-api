@@ -18,8 +18,8 @@ export interface UsersDb {
 
   updateUser: (user: User) => Promise<boolean>;
   insertUser: (user: User) => Promise<User | null>;
-  deleteUser: (user: User) => Promise<number>;
-  deleteUserByUUID: (uuid: string) => Promise<number>;
+  deleteUser: (user: User) => Promise<boolean>;
+  deleteUserByUUID: (uuid: string) => Promise<boolean>;
 }
 
 export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
@@ -32,15 +32,15 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
     if (!GrantNameHas(name)) {
       throw new InvalidPropertyError("Invalid Grant name from database");
     }
-    return { id: _id.toString(), name: name as GrantName, desc };
+    return { id: _id.toHexString(), name: name as GrantName, desc };
   };
   const parseRole = ({ _id, name, desc, grants }: RoleJsonObj): Role => {
     const validGrants = grants.filter((grant) => grant._id !== undefined);
-    return { id: _id.toString(), name, desc, grants: validGrants.map(parseGrant) };
+    return { id: _id.toHexString(), name, desc, grants: validGrants.map(parseGrant) };
   };
   const parseUser = ({ _id, name, email, roles, uuid }: UserJsonObj): User => {
     const validRoles = roles.filter((role) => role._id !== undefined);
-    return { id: _id.toString(), name, email, uuid, roles: validRoles.map(parseRole) };
+    return { id: _id.toHexString(), name, email, uuid, roles: validRoles.map(parseRole) };
   };
 
   class UsersDbImpl implements UsersDb {
@@ -176,7 +176,7 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       return { ...copyUser, id: _id.toString() };
     }
 
-    async deleteUserByUUID(uuid: string): Promise<number> {
+    async deleteUserByUUID(uuid: string): Promise<boolean> {
       if (!uuid) {
         throw new InvalidPropertyError("UUI cannot be null");
       }
@@ -184,10 +184,10 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       const result = await db.collection(users).deleteOne({
         uuid: { $eq: uuid },
       });
-      return result.deletedCount;
+      return result.deletedCount === 1;
     }
 
-    async deleteUser(user: User): Promise<number> {
+    async deleteUser(user: User): Promise<boolean> {
       const uuid = user.uuid;
       return await this.deleteUserByUUID(uuid);
     }

@@ -23,6 +23,7 @@ export interface Group {
   name: string;
   desc: string;
   enabled: boolean;
+  id: string;
 }
 
 export interface Entry {
@@ -143,10 +144,12 @@ export function buildMakeGroup({}) {
     name,
     desc = "",
     enabled = true,
+    id = undefined,
   }: {
     name: string;
     desc?: string;
     enabled?: boolean;
+    readonly id?: string;
   }): Group {
     if (!name || name.replace(/\s+/g, "").length === 0) {
       throw new InvalidPropertyError("Name cannot be empty");
@@ -154,10 +157,11 @@ export function buildMakeGroup({}) {
     if (!desc) {
       throw new InvalidPropertyError("Desc cannot be null");
     }
-    return Object.freeze({
+    return {
       name,
       desc,
       enabled,
-    });
+      id,
+    };
   };
 }
