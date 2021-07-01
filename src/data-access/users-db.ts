@@ -1,13 +1,13 @@
 import { ObjectID } from "mongodb";
 
-import { databaseCollections } from "../../fixtures/db/mailpy-db-setup";
+import { collections } from "../../fixtures/db/mailpy-db-setup";
 import { DatabaseDuplicatedKeyError, InvalidPropertyError } from "../helpers/errors";
 import { Grant, GrantName, GrantNameHas, Role, User } from "../entities/user";
 import { CodeDuplicatedKey } from "./error-codes";
 import { MakeDb } from "./interfaces";
 import { deepCopy } from "../helpers/deep-copy";
 
-const { users, grants, roles } = databaseCollections;
+const { users, grants, roles } = collections;
 
 export interface UsersDb {
   findAllGrants: () => Promise<Grant[]>;

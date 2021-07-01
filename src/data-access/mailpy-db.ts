@@ -1,7 +1,7 @@
 import { Condition, Entry, Group } from "../entities";
-import { databaseCollections } from "../../fixtures/db/mailpy-db-setup";
+import { collections } from "../../fixtures/db/mailpy-db-setup";
 import { MakeDb } from "./interfaces";
-const { conditions, entries, groups } = databaseCollections;
+const { conditions, entries, groups } = collections;
 
 export interface MailpyDB {
   findAllConditions: () => Promise<Condition[]>;
@@ -20,6 +20,10 @@ export interface MailpyDB {
 }
 
 export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
+  type GroupJsonObj = {};
+  type ConditionJsonObj = {};
+  type EntryJsonObj = {};
+
   class MailpyDBImpl implements MailpyDB {
     async updateGroup(group: Group): Promise<Group> {
       throw "Not Impplemented";
