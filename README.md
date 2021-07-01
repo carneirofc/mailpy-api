@@ -1,5 +1,5 @@
 # Mailpy REST - API
-
+[![Node.js CI](https://github.com/carneirofc/mailpy-api/actions/workflows/test.yml/badge.svg)](https://github.com/carneirofc/mailpy-api/actions/workflows/test.yml)
 ## Deploy
 
 | Env         | Default                             | Description                 |
