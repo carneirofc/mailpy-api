@@ -27,6 +27,22 @@ describe("Create a group", () => {
     expect(() => makeGroup({ name: "  \t\t \r \r \t    " })).toThrow(InvalidPropertyError);
   });
 
+  it("make entry emails", () => {
+    const condition = makeCondition(ConditionName.INCREASING_STEP, "");
+    const _defaults = {
+      condition,
+      group,
+      alarm_values: "1:2:3",
+      email_timeout: 1600,
+      subject: "",
+      unit: "",
+      warning_message: "",
+    };
+
+    const entry = makeEntry({ emails: ["12", "#1 23 ", "12", " asd ", " ", "   "], ..._defaults });
+    expect(entry.emails).toStrictEqual(["12", "#123", "asd"]);
+  });
+
   it(`condition and values: "${ConditionName.INCREASING_STEP}"`, () => {
     const condition = makeCondition(ConditionName.INCREASING_STEP, "");
     const invalidValues = ["", "FFF", "0,2", "14g", "1:1", "3:2:1"];
