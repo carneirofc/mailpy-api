@@ -85,21 +85,13 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
     async findAllConditions(): Promise<Condition[]> {
       const db = await makeDb();
       const result = await db.collection(conditions).find({}).toArray();
-      return result.map(({ _id: id, desc, name }: ConditionJsonObj) => {
-        return {
-          id: id.toHexString(),
-          desc,
-          name,
-        };
-      });
+      return result.map((conditionJson: ConditionJsonObj) => parseCondition(conditionJson));
     }
 
     async findAllGroups(): Promise<Group[]> {
       const db = await makeDb();
       const result = await db.collection(groups).find({}).toArray();
-      return result.map(({ _id: id, name, desc, enabled }: GroupJsonObj) => {
-        return { id: id.toHexString(), name, desc, enabled };
-      });
+      return result.map((groupJson: GroupJsonObj) => parseGroup(groupJson));
     }
 
     async findAllEntries(): Promise<Entry[]> {
@@ -115,11 +107,17 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
               as: "group",
             },
           },
+          {
+            $lookup: {
+              from: "conditions",
+              localField: "condition",
+              foreignField: "name",
+              as: "condition",
+            },
+          },
         ])
         .toArray();
-      return result.map(({ _id: id, ...data }) => {
-        return { id: id.toString(), ...data };
-      });
+      return result.map((entryJson) => parseEntry(entryJson));
     }
   }
   return Object.freeze(new MailpyDBImpl());
