@@ -1,6 +1,7 @@
-import { Condition, Entry, Group } from "../entities";
+import { Condition, ConditionName, Entry, Group, makeCondition, makeEntry, makeGroup } from "../entities";
 import { collections } from "../../fixtures/db/mailpy-db-setup";
 import { MakeDb } from "./interfaces";
+import { ObjectId } from "mongodb";
 const { conditions, entries, groups } = collections;
 
 export interface MailpyDB {
@@ -20,9 +21,36 @@ export interface MailpyDB {
 }
 
 export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
-  type GroupJsonObj = {};
-  type ConditionJsonObj = {};
-  type EntryJsonObj = {};
+  type GroupJsonObj = { _id: ObjectId; name: string; desc: string; enabled: boolean };
+  type ConditionJsonObj = { _id: ObjectId; name: ConditionName; desc: string };
+  type EntryJsonObj = {
+    _id: ObjectId;
+    alarm_values: string;
+    condition: ConditionJsonObj;
+    email_timeout: number;
+    emails: string;
+    group: GroupJsonObj;
+    pvname: string;
+    subject: string;
+    unit: string;
+    warning_message: string;
+  };
+
+  function parseGroup({ _id, name, desc, enabled }: GroupJsonObj): Group {
+    return makeGroup({ desc, name, enabled });
+  }
+  function parseCondition({ _id, name, desc }: ConditionJsonObj): Condition {
+    return { id: _id.toHexString(), name, desc };
+  }
+  function parseEntry({ _id, condition, emails, group, ...data }: EntryJsonObj): Entry {
+    return makeEntry({
+      id: _id.toHexString(),
+      emails: emails.split(";"),
+      group: parseGroup(group),
+      condition: parseCondition(condition),
+      ...data,
+    });
+  }
 
   class MailpyDBImpl implements MailpyDB {
     async updateGroup(group: Group): Promise<Group> {
@@ -57,9 +85,9 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
     async findAllConditions(): Promise<Condition[]> {
       const db = await makeDb();
       const result = await db.collection(conditions).find({}).toArray();
-      return result.map(({ _id: id, desc, name }) => {
+      return result.map(({ _id: id, desc, name }: ConditionJsonObj) => {
         return {
-          id: id.toString(),
+          id: id.toHexString(),
           desc,
           name,
         };
@@ -69,8 +97,8 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
     async findAllGroups(): Promise<Group[]> {
       const db = await makeDb();
       const result = await db.collection(groups).find({}).toArray();
-      return result.map(({ _id: id, name, desc, ...data }) => {
-        return { id: id.toString(), name, desc };
+      return result.map(({ _id: id, name, desc, enabled }: GroupJsonObj) => {
+        return { id: id.toHexString(), name, desc, enabled };
       });
     }
 
