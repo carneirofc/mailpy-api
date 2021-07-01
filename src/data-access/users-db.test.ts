@@ -59,10 +59,10 @@ describe("mailpy db", () => {
 
     // delete the user
     let deleteCount = await usersDb.deleteUserByUUID(tmpUser.uuid);
-    expect(deleteCount).toBe(1);
+    expect(deleteCount).toBe(true);
 
     deleteCount = await usersDb.deleteUserByUUID(tmpUser.uuid);
-    expect(deleteCount).toBe(0);
+    expect(deleteCount).toBe(false);
   });
 
   it("insert user with roles", async () => {
@@ -85,7 +85,7 @@ describe("mailpy db", () => {
     expect(foundNewRoleUser.roles.length).toBe(2);
 
     const deleteCount = await usersDb.deleteUserByUUID(foundNewRoleUser.uuid);
-    expect(deleteCount).toBe(1);
+    expect(deleteCount).toBe(true);
   });
 
   it("find grants", async () => {

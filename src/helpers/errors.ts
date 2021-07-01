@@ -7,11 +7,11 @@ export class InvalidPropertyError extends Error {
   }
 }
 
-export class DatabaseUnexpectedError extends Error {
+export class DatabaseError extends Error {
   constructor(msg: string) {
-    super(`data-access failure, unexpected error: ${msg}`);
+    super(`data-access failure: ${msg}`);
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, DatabaseUnexpectedError);
+      Error.captureStackTrace(this, DatabaseError);
     }
   }
 }

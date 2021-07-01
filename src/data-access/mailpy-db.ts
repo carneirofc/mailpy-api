@@ -2,6 +2,9 @@ import { Condition, ConditionName, Entry, Group, makeCondition, makeEntry, makeG
 import { collections } from "../../fixtures/db/mailpy-db-setup";
 import { MakeDb } from "./interfaces";
 import { ObjectId } from "mongodb";
+import { DatabaseDuplicatedKeyError, DatabaseError, InvalidPropertyError } from "../helpers/errors";
+import { CodeDuplicatedKey } from "./error-codes";
+
 const { conditions, entries, groups } = collections;
 
 export interface MailpyDB {
@@ -9,15 +12,21 @@ export interface MailpyDB {
   findAllEntries: () => Promise<Entry[]>;
   findAllGroups: () => Promise<Group[]>;
 
-  findCondition: (id: string) => Promise<Condition>;
-  findEntry: (id: string) => Promise<Entry>;
-  findGroup: (id: string) => Promise<Group>;
+  findConditionById: (id: string) => Promise<Condition>;
+  findEntryById: (id: string) => Promise<Entry>;
+  findGroupById: (id: string) => Promise<Group>;
 
   createGroup: (group: Group) => Promise<Group>;
   createEntry: (entry: Entry) => Promise<Entry>;
 
   updateGroup: (group: Group) => Promise<Group>;
   updateEntry: (entry: Entry) => Promise<Entry>;
+
+  deleteGroupById: (id: string) => Promise<boolean>;
+  deleteGroup: (group: Group) => Promise<boolean>;
+
+  deleteEntryById: (id: string) => Promise<boolean>;
+  deleteEntry: (entry: Entry) => Promise<boolean>;
 }
 
 export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
@@ -37,7 +46,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
   };
 
   function parseGroup({ _id, name, desc, enabled }: GroupJsonObj): Group {
-    return makeGroup({ desc, name, enabled });
+    return makeGroup({ id: _id.toHexString(), desc, name, enabled });
   }
   function parseCondition({ _id, name, desc }: ConditionJsonObj): Condition {
     return { id: _id.toHexString(), name, desc };
@@ -53,44 +62,94 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
   }
 
   class MailpyDBImpl implements MailpyDB {
-    async updateGroup(group: Group): Promise<Group> {
-      throw "Not Impplemented";
+    deleteEntryById: (id: string) => Promise<boolean>;
+    deleteEntry: (entry: Entry) => Promise<boolean>;
+
+    async deleteGroupById(id: string): Promise<boolean> {
+      if (id === null || id === undefined) {
+        throw new InvalidPropertyError(`Cannot delete group with undefined id "${id}"`);
+      }
+      const db = await makeDb();
+      const res = await db.collection<GroupJsonObj>(groups).deleteOne({ _id: new ObjectId(id) });
+      return res.deletedCount === 1;
     }
+
+    async deleteGroup(group: Group): Promise<boolean> {
+      return await this.deleteGroupById(group.id);
+    }
+
+    async updateGroup(group: Group): Promise<Group> {
+      const db = await makeDb();
+
+      if (group.id === null || group.id === undefined) {
+        throw new InvalidPropertyError(`Cannot update group without an id ${group}`);
+      }
+
+      const res = await db
+        .collection<GroupJsonObj>(groups)
+        .updateOne(
+          { _id: new ObjectId(group.id) },
+          { $set: { name: group.name, enabled: group.enabled, desc: group.desc } }
+        );
+      if (res.result.nModified !== 1) {
+        throw new DatabaseError(`Failure on group update "${group}"`);
+      }
+      return await this.findGroupById(group.id);
+    }
+
     async updateEntry(entry: Entry): Promise<Entry> {
       throw "Not Impplemented";
     }
+
     async createEntry(entry: Entry): Promise<Entry> {
       throw "Not Impplemented";
     }
 
     async createGroup(group: Group): Promise<Group> {
-      throw "Not Impplemented";
+      const db = await makeDb();
+      const res = await db
+        .collection<GroupJsonObj>(groups)
+        .insertOne({
+          name: group.name,
+          desc: group.desc,
+          enabled: group.enabled,
+        })
+        .catch((error) => {
+          const { code, message } = error;
+          if (code == CodeDuplicatedKey) {
+            throw new DatabaseDuplicatedKeyError(message);
+          }
+          throw error;
+        });
+
+      return parseGroup(res.ops[0]);
     }
 
-    async findCondition(id: string): Promise<Condition> {
+    async findConditionById(id: string): Promise<Condition> {
       const db = await makeDb();
       throw "Not Impplemented";
     }
 
-    async findEntry(id: string): Promise<Entry> {
+    async findEntryById(id: string): Promise<Entry> {
       const db = await makeDb();
       throw "Not Impplemented";
     }
 
-    async findGroup(id: string): Promise<Group> {
+    async findGroupById(id: string): Promise<Group> {
       const db = await makeDb();
-      throw "Not Impplemented";
+      const res = await db.collection<GroupJsonObj>(groups).findOne({ _id: new ObjectId(id) });
+      return parseGroup(res);
     }
 
     async findAllConditions(): Promise<Condition[]> {
       const db = await makeDb();
-      const result = await db.collection(conditions).find({}).toArray();
+      const result = await db.collection<ConditionJsonObj>(conditions).find({}).toArray();
       return result.map((conditionJson: ConditionJsonObj) => parseCondition(conditionJson));
     }
 
     async findAllGroups(): Promise<Group[]> {
       const db = await makeDb();
-      const result = await db.collection(groups).find({}).toArray();
+      const result = await db.collection<GroupJsonObj>(groups).find({}).toArray();
       return result.map((groupJson: GroupJsonObj) => parseGroup(groupJson));
     }
 
