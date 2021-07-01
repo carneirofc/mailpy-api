@@ -6,8 +6,7 @@ import { DatabaseDuplicatedKeyError } from "../helpers/errors";
 
 import makeDb, { closeDb } from "../../fixtures/db/db";
 import { initApplicationDatabase } from "../../fixtures/db";
-import { grantsEnum, defaultRoles } from "../../fixtures/db/mailpy-db-data";
-import { expectCt } from "helmet";
+import { grantsEnum, defaultRoles } from "../../fixtures/db/authorization";
 
 beforeAll(async () => await initApplicationDatabase({ makeDb }));
 

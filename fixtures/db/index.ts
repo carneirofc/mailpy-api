@@ -1,4 +1,5 @@
 import { Db } from "mongodb";
+
 import makeMailpyDbData from "./mailpy-db-data";
 import makeMailpyDbSetup from "./mailpy-db-setup";
 

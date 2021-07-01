@@ -2,7 +2,7 @@ import makeMailpyDb, { MailpyDB } from "./mailpy-db";
 
 import { initApplicationDatabase } from "../../fixtures/db";
 import makeDb, { closeDb } from "../../fixtures/db/db";
-import { conditionsEnum, grantsEnum, defaultRoles } from "../../fixtures/db/mailpy-db-data";
+import { conditionsEnum, grantsEnum, defaultRoles } from "../../fixtures/db/authorization";
 
 beforeAll(async () => await initApplicationDatabase({ makeDb }));
 
