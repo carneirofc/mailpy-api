@@ -2,16 +2,7 @@ import passport from "passport";
 import { Router } from "express";
 import makeCallback from "../helpers/express-callback";
 
-import {
-  getConditions,
-  getEntries,
-  getGroups,
-  getUserLogin,
-  postGroup,
-  postEntry,
-  getGroup,
-  getEntry,
-} from "../controller";
+import { getConditions, getEntries, getGroups, getUserLogin, postGroup, postEntry } from "../controller";
 
 import config from "../config";
 
