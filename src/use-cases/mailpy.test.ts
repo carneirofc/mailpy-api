@@ -6,8 +6,8 @@ import { initApplicationDatabase } from "../../fixtures/db";
 import makeMailpyDb, { MailpyDB } from "../data-access/mailpy-db";
 import makeUsersDb, { UsersDb } from "../data-access/users-db";
 
-import makeAddGroup from "./add-group";
-import makeAddEntry from "./add-entry";
+import { makeAddGroup, makeListGroups } from "./group";
+import { makeAddEntry } from "./entry";
 import { ConditionName } from "../entities";
 
 beforeAll(async () => await initApplicationDatabase({ makeDb }));

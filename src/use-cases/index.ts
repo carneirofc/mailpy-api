@@ -1,30 +1,27 @@
 import { mailpyDb, usersDb } from "../data-access";
 
 import makeListConditions from "./list-conditions";
-import makeListGroups from "./list-groups";
-import makeListEntries from "./list-entries";
+import * as groupUseCase from "./group";
+import * as entryUseCase from "./entry";
 import makeUserLogin from "./login-user";
-import makeAddGroup from "./add-group";
-import makeAddEntry from "./add-entry";
 
 import { getAzureUserInfo as getExternalUserInfo } from "../helpers/azure";
 
 export const listConditions = makeListConditions({ mailpyDb });
-export const listGroups = makeListGroups({ mailpyDb });
-export const listEntries = makeListEntries({ mailpyDb });
-export const addGroup = makeAddGroup({ mailpyDb });
-export const addEntry = makeAddEntry({ mailpyDb });
+
+export const listGroups = groupUseCase.makeListGroups({ mailpyDb });
+export const addGroup = groupUseCase.makeAddGroup({ mailpyDb });
+export const updateGroup = groupUseCase.makeUpdateGroup({ mailpyDb });
+// export const addGroup = groupUseCase.makeAddGroup({ mailpyDb });
+
+export const listEntries = entryUseCase.makeListEntries({ mailpyDb });
+export const listEntry = entryUseCase.makeListEntry({ mailpyDb });
+export const addEntry = entryUseCase.makeAddEntry({ mailpyDb });
+export const deleteEntry = entryUseCase.makeDeleteEntry({ mailpyDb });
+export const updateEntry = entryUseCase.makeUpdateEntry({ mailpyDb });
 
 export const userLogin = makeUserLogin({
   mailpyDb,
   usersDb,
   getExternalUserInfo,
 });
-
-const mailpyService = Object.freeze({
-  listConditions,
-  listEntries,
-  listGroups,
-  userLogin,
-});
-export default mailpyService;
