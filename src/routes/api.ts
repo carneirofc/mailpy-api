@@ -2,7 +2,7 @@ import passport from "passport";
 import { Router } from "express";
 import makeCallback from "../helpers/express-callback";
 
-import { getConditions, getEntries, getGroups, getUserLogin, postGroup, postEntry } from "../controller";
+import * as controllers from "../controller";
 
 import config from "../config";
 
@@ -16,29 +16,52 @@ interface Route {
 
 const routesList: Route[] = [];
 /** Helper function to keep track of the available endpoints */
-const pushRoute = (type: "get" | "use" | "post" | "all", name: string, ...args: any) => {
+const pushRoute = (type: "delete" | "get" | "put" | "patch" | "post" | "all", name: string, ...args: any) => {
   switch (type) {
     case "get":
       router.get(name, ...args);
       break;
+
+    case "post":
+      router.post(name, ...args);
+      break;
+
+    case "delete":
+      router.delete(name, ...args);
+      break;
+    case "patch":
+      router.patch(name, ...args);
+      break;
+
     default:
-      router.all(name, ...args);
+      console.warn("Invalid route", type, name);
       break;
   }
   routesList.push({ type, name: `${API_ROOT}${name}` });
 };
 
-pushRoute("post", `/group`, makeCallback(postGroup));
-pushRoute("post", `/entry`, makeCallback(postEntry));
-// pushRoute("get", `/entry`, makeCallback(getEntry));
-// pushRoute("get", `/group`, makeCallback(getGroup));
+pushRoute("delete", `/entry`, makeCallback(controllers.deleteEntry));
+pushRoute("get", `/entries`, makeCallback(controllers.getEntries));
+pushRoute("get", `/entry`, makeCallback(controllers.getEntry));
+pushRoute("patch", `/entry`, makeCallback(controllers.updateEntry));
+pushRoute("post", `/entry`, makeCallback(controllers.postEntry));
 
-pushRoute("get", `/conditions`, makeCallback(getConditions));
-pushRoute("get", `/entries`, makeCallback(getEntries));
-pushRoute("get", `/groups`, makeCallback(getGroups));
-pushRoute("get", `/user/login`, passport.authenticate("oauth-bearer", { session: false }), makeCallback(getUserLogin));
+// pushRoute("delete", `/group`, makeCallback(controllers.deleteGroup));
+pushRoute("get", `/groups`, makeCallback(controllers.getGroups));
+pushRoute("patch", `/group`, makeCallback(controllers.updateGroup));
+pushRoute("post", `/group`, makeCallback(controllers.postGroup));
+
+pushRoute("get", `/conditions`, makeCallback(controllers.getConditions));
+pushRoute(
+  "get",
+  `/user/login`,
+  passport.authenticate("oauth-bearer", { session: false }),
+  makeCallback(controllers.getUserLogin)
+);
 
 console.info("Available API endpoints");
-routesList.forEach(({ name, type }) => console.info(`${type} ${name}`));
+routesList
+  .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
+  .forEach(({ name, type }) => console.info(`${type} ${name}`));
 
 export default router;

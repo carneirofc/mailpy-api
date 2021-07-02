@@ -1,17 +1,22 @@
 // @todo: Inject use cases at the controllers
-import { listConditions, listEntries, listGroups, userLogin, addEntry, addGroup } from "../use-cases";
+import * as useCases from "../use-cases";
 
+import * as entryController from "./entry";
+import * as groupController from "./group";
 import makeGetConditions from "./get-conditions";
-import makeGetEntries from "./get-entries";
-import makeGetGroups from "./get-groups";
 import makeGetUser from "./get-user-login";
-import makePostEntry from "./post-entry";
-import makePostGroup from "./post-group";
 
-export const getConditions = makeGetConditions({ listConditions });
-export const getEntries = makeGetEntries({ listEntries });
-export const getGroups = makeGetGroups({ listGroups });
-export const getUserLogin = makeGetUser({ userLogin });
+export const postEntry = entryController.makePostEntry({ addEntry: useCases.addEntry });
+export const getEntries = entryController.makeGetEntries({ listEntries: useCases.listEntries });
+export const updateEntry = entryController.makeUpdateEntry({ updateEntry: useCases.updateEntry });
+export const deleteEntry = entryController.makeDeleteEntry({ deleteEntry: useCases.deleteEntry });
+export const getEntry = entryController.makeGetEntry({ listEntry: useCases.listEntry });
 
-export const postEntry = makePostEntry({ addEntry });
-export const postGroup = makePostGroup({ addGroup });
+export const postGroup = groupController.makePostGroup({ addGroup: useCases.addGroup });
+export const getGroups = groupController.makeGetGroups({ listGroups: useCases.listGroups });
+export const updateGroup = groupController.makeUpdateGroup({ updateGroup: useCases.updateGroup });
+// export const deleteGroup = groupController.makeDeleteGroup({ deleteGroup: useCases.deleteGroup });
+
+export const getConditions = makeGetConditions({ listConditions: useCases.listConditions });
+
+export const getUserLogin = makeGetUser({ userLogin: useCases.userLogin });
