@@ -1,8 +1,8 @@
-export type ControllerResponseBody = string | string[] | {};
+export type ControllerResponseBody<T> = { error: string } | T;
 
-export interface ControllerResponse {
+export interface ControllerResponse<T> {
   statusCode: number;
-  body: ControllerResponseBody;
+  body: ControllerResponseBody<T>;
   headers: { [key: string]: string };
 }
 
@@ -10,8 +10,8 @@ export interface ControllerParsedQs {
   [key: string]: undefined | string | string[] | ControllerParsedQs | ControllerParsedQs[];
 }
 
-export interface ControllerHttpRequest {
-  body: any;
+export interface ControllerHttpRequest<BodyT> {
+  body: BodyT;
   headers: { [key: string]: string };
   ip: string;
   method: string;
@@ -19,4 +19,6 @@ export interface ControllerHttpRequest {
   path: string;
   query: ControllerParsedQs;
 }
-export type Controller = (httpRequest: ControllerHttpRequest) => Promise<ControllerResponse>;
+export type Controller<BodyT, ResponseT> = (
+  httpRequest: ControllerHttpRequest<BodyT>
+) => Promise<ControllerResponse<ResponseT>>;

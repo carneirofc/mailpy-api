@@ -1,6 +1,11 @@
 import { Controller } from "./comm-types";
+import { Condition } from "../entities";
 
-const makeGetConditions = ({ listConditions }: { listConditions: () => Promise<any> }): Controller => {
+const makeGetConditions = ({
+  listConditions,
+}: {
+  listConditions: () => Promise<Condition[]>;
+}): Controller<any, Condition[]> => {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
