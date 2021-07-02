@@ -11,6 +11,7 @@ describe("Create a group", () => {
     subject: "",
     unit: "",
     warning_message: "",
+    pvname: faker.name.title(),
   };
 
   beforeAll(() => {
@@ -30,6 +31,7 @@ describe("Create a group", () => {
   it("make entry emails", () => {
     const condition = makeCondition(ConditionName.INCREASING_STEP, "");
     const _defaults = {
+      pvname: faker.name.title(),
       condition,
       group,
       alarm_values: "1:2:3",
