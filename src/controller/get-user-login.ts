@@ -1,7 +1,11 @@
 import { User } from "../entities";
 import { Controller } from "./comm-types";
 
-const makeGetUser = ({ userLogin }: { userLogin: (arg0: string) => Promise<User> }): Controller => {
+export default function makeGetUser({
+  userLogin,
+}: {
+  userLogin: (arg0: string) => Promise<User>;
+}): Controller<any, User> {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -29,5 +33,4 @@ const makeGetUser = ({ userLogin }: { userLogin: (arg0: string) => Promise<User>
       };
     }
   };
-};
-export default makeGetUser;
+}

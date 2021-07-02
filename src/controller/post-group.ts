@@ -1,19 +1,23 @@
-import { Group } from "../entities";
+import { AddGroup, AddGroupUseCase } from "../use-cases/add-group";
 import { Controller } from "./comm-types";
-const makeGetGroups = ({ listGroups }: { listGroups: () => Promise<any> }): Controller<any, Group[]> => {
+import { Group } from "../entities";
+
+export default function makePostGroup({ addGroup }: { addGroup: AddGroupUseCase }): Controller<AddGroup, Group> {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
     };
+
     try {
-      const groups = await listGroups();
+      const body = httpRequest.body;
+      const res = await addGroup(body);
       return {
         headers,
         statusCode: 200,
-        body: groups,
+        body: res,
       };
     } catch (e) {
-      console.error(`Failed to get groups ${e}`, e);
+      console.error(`Failed to insert entry ${e}`, e);
       return {
         headers,
         statusCode: 400,
@@ -23,5 +27,4 @@ const makeGetGroups = ({ listGroups }: { listGroups: () => Promise<any> }): Cont
       };
     }
   };
-};
-export default makeGetGroups;
+}

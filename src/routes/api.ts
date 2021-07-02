@@ -2,7 +2,16 @@ import passport from "passport";
 import { Router } from "express";
 import makeCallback from "../helpers/express-callback";
 
-import { getConditions, getEntries, getGroups, getUserLogin } from "../controller";
+import {
+  getConditions,
+  getEntries,
+  getGroups,
+  getUserLogin,
+  postGroup,
+  postEntry,
+  getGroup,
+  getEntry,
+} from "../controller";
 
 import config from "../config";
 
@@ -27,6 +36,11 @@ const pushRoute = (type: "get" | "use" | "post" | "all", name: string, ...args: 
   }
   routesList.push({ type, name: `${API_ROOT}${name}` });
 };
+
+pushRoute("post", `/group`, makeCallback(postGroup));
+pushRoute("post", `/entry`, makeCallback(postEntry));
+// pushRoute("get", `/entry`, makeCallback(getEntry));
+// pushRoute("get", `/group`, makeCallback(getGroup));
 
 pushRoute("get", `/conditions`, makeCallback(getConditions));
 pushRoute("get", `/entries`, makeCallback(getEntries));
