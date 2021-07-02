@@ -28,6 +28,7 @@ export interface Group {
 
 export interface Entry {
   id: string;
+  pvname: string;
   condition: Condition;
   email_timeout: number;
   alarm_values: string; // @todo: Parse string from db into a valid object ...
@@ -58,6 +59,7 @@ export function buildMakeEntry({}) {
     subject: string;
     unit: string;
     warning_message: string;
+    pvname: string;
   }
   const isIncreasingStepValid = (stringValue: string): boolean => {
     const values = stringValue.split(":").map((val) => Number(val));
