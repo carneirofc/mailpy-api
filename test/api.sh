@@ -45,4 +45,4 @@ function get_entry {
 get_entries
 get_groups
 get_conditions
-get_entry "123123"
+
