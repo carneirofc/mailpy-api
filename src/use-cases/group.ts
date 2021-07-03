@@ -34,6 +34,13 @@ export function makeAddGroup({ mailpyDb }: { mailpyDb: MailpyDB }): AddGroupUseC
   };
 }
 
+export function makeGetGroup({ mailpyDb }: { mailpyDb: MailpyDB }) {
+  return async function (id: string) {
+    const group = await mailpyDb.findGroupById(id);
+    return group;
+  };
+}
+
 export function makeListGroups({ mailpyDb }: { mailpyDb: MailpyDB }) {
   return async function () {
     const groups = await mailpyDb.findAllGroups();

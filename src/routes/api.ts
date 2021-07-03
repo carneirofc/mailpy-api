@@ -48,6 +48,7 @@ pushRoute("post", `/entry`, makeCallback(controllers.postEntry));
 
 // pushRoute("delete", `/group`, makeCallback(controllers.deleteGroup));
 pushRoute("get", `/groups`, makeCallback(controllers.getGroups));
+pushRoute("get", `/group`, makeCallback(controllers.getGroup));
 pushRoute("patch", `/group`, makeCallback(controllers.updateGroup));
 pushRoute("post", `/group`, makeCallback(controllers.postGroup));
 
