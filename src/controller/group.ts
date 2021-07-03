@@ -65,6 +65,31 @@ export function makeUpdateGroup({
   };
 }
 
+export function makeGetGroup({ getGroup }: { getGroup: (id: string) => Promise<Group> }): Controller<any, Group> {
+  return async (httpRequest) => {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    try {
+      const group = await getGroup(httpRequest.query.id as string);
+      return {
+        headers,
+        statusCode: 200,
+        body: group,
+      };
+    } catch (e) {
+      console.error(`Failed to get groups ${e}`, e);
+      return {
+        headers,
+        statusCode: 400,
+        body: {
+          error: e.message,
+        },
+      };
+    }
+  };
+}
+
 export function makeGetGroups({ listGroups }: { listGroups: () => Promise<any> }): Controller<any, Group[]> {
   return async (httpRequest) => {
     const headers = {

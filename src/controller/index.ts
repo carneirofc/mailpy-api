@@ -14,6 +14,7 @@ export const getEntry = entryController.makeGetEntry({ listEntry: useCases.listE
 
 export const postGroup = groupController.makePostGroup({ addGroup: useCases.addGroup });
 export const getGroups = groupController.makeGetGroups({ listGroups: useCases.listGroups });
+export const getGroup = groupController.makeGetGroup({ getGroup: useCases.getGroup });
 export const updateGroup = groupController.makeUpdateGroup({ updateGroup: useCases.updateGroup });
 // export const deleteGroup = groupController.makeDeleteGroup({ deleteGroup: useCases.deleteGroup });
 

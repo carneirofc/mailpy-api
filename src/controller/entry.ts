@@ -14,7 +14,7 @@ export function makeGetEntry({
       "Content-Type": "application/json",
     };
     try {
-      const entry = await listEntry(httpRequest.body.id);
+      const entry = await listEntry((httpRequest.query as { id: string }).id);
       return {
         headers,
         statusCode: 200,

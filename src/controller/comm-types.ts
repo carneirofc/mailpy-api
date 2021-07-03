@@ -6,8 +6,8 @@ export interface ControllerResponse<T> {
   headers: { [key: string]: string };
 }
 
-export interface ControllerParsedQs {
-  [key: string]: undefined | string | string[] | ControllerParsedQs | ControllerParsedQs[];
+export interface ControllerParsedQs<T> {
+  [key: string]: undefined | string | string[] | ControllerParsedQs<T> | ControllerParsedQs<T>[] | T;
 }
 
 export interface ControllerHttpRequest<BodyT> {
@@ -17,7 +17,7 @@ export interface ControllerHttpRequest<BodyT> {
   method: string;
   params: { [key: string]: string };
   path: string;
-  query: ControllerParsedQs;
+  query: ControllerParsedQs<BodyT>;
 }
 export type Controller<BodyT, ResponseT> = (
   httpRequest: ControllerHttpRequest<BodyT>

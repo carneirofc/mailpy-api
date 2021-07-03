@@ -10,6 +10,7 @@ import { getAzureUserInfo as getExternalUserInfo } from "../helpers/azure";
 export const listConditions = makeListConditions({ mailpyDb });
 
 export const listGroups = groupUseCase.makeListGroups({ mailpyDb });
+export const getGroup = groupUseCase.makeGetGroup({ mailpyDb });
 export const addGroup = groupUseCase.makeAddGroup({ mailpyDb });
 export const updateGroup = groupUseCase.makeUpdateGroup({ mailpyDb });
 // export const addGroup = groupUseCase.makeAddGroup({ mailpyDb });
