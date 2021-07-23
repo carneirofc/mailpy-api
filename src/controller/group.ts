@@ -71,7 +71,7 @@ export function makeGetGroup({ getGroup }: { getGroup: (id: string) => Promise<G
       "Content-Type": "application/json",
     };
     try {
-      const group = await getGroup(httpRequest.query.id as string);
+      const group = await getGroup(httpRequest.query.id);
       return {
         headers,
         statusCode: 200,

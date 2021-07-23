@@ -12,10 +12,10 @@ export default function makeExpressCallback(controller: Controller<any, any>): R
       method: req.method,
       path: req.path,
       headers: {
-        "Content-Type": req.get("Content-Type"),
-        "User-Agent": req.get("User-Agent"),
-        Referer: req.get("referer"),
-        Authorization: req.get("authorization"),
+        "Content-Type": req.get("Content-Type") as string,
+        "User-Agent": req.get("User-Agent") as string,
+        Referer: req.get("referer") as string,
+        Authorization: req.get("authorization") as string,
       },
     };
 

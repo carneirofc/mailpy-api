@@ -1,11 +1,4 @@
-export class InvalidPropertyError extends Error {
-  constructor(msg: string) {
-    super(msg);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidPropertyError);
-    }
-  }
-}
+export { InvalidPropertyError } from "mailpy-common";
 
 export class DatabaseError extends Error {
   constructor(msg: string) {

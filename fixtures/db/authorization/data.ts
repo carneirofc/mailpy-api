@@ -1,8 +1,7 @@
 import { Db, ObjectID } from "mongodb";
 import { collections } from "./setup";
-import { GrantName, ConditionName } from "./../../../src/entities";
+import { GrantName, ConditionName } from "../../../src/entities";
 import { listFromObjects } from "../../../src/helpers";
-
 const { grants, roles, users } = collections;
 
 export const conditionsEnum = {
