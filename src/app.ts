@@ -9,11 +9,7 @@ import { BearerStrategy } from "passport-azure-ad";
 
 import { strategyOptions } from "./config/azure";
 import middleware from "./middlewares";
-import indexRouter from "./routes/index";
 import apiRouter from "./routes/api";
-import config from "./config";
-
-const API_ROOT = config.api.API_ROOT;
 
 const bearerStrategy = new BearerStrategy(
   {
@@ -48,14 +44,10 @@ app.use(helmet()); // Nice to have headers
 app.use(express.json());
 app.use(morgan(loggerLevel)); // Request Logger
 app.use(urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../public")));
 app.use(passport.initialize());
 passport.use(bearerStrategy);
 
-app.use(API_ROOT, apiRouter);
-app.use("/", indexRouter);
-
+app.use(apiRouter);
 app.use(middleware.routeNotFound);
 app.use(middleware.exceptionHappened);
-
 export default app;

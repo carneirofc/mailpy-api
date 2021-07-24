@@ -13,7 +13,7 @@ export const listGroups = groupUseCase.makeListGroups({ mailpyDb });
 export const getGroup = groupUseCase.makeGetGroup({ mailpyDb });
 export const addGroup = groupUseCase.makeAddGroup({ mailpyDb });
 export const updateGroup = groupUseCase.makeUpdateGroup({ mailpyDb });
-// export const addGroup = groupUseCase.makeAddGroup({ mailpyDb });
+export const deleteGroup = groupUseCase.makeDeleteGroup({ mailpyDb });
 
 export const listEntries = entryUseCase.makeListEntries({ mailpyDb });
 export const listEntry = entryUseCase.makeListEntry({ mailpyDb });
