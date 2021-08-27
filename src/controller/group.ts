@@ -99,7 +99,7 @@ export function makeDeleteGroup({
       "Content-Type": "application/json",
     };
     try {
-      const group = await deleteGroup(httpRequest.query.id);
+      const group = await deleteGroup(httpRequest.body.id);
       return {
         headers,
         statusCode: 200,
