@@ -5,20 +5,23 @@ export interface ControllerResponse<T> {
   body: ControllerResponseBody<T>;
   headers: { [key: string]: string };
 }
-
+/*
 export interface ControllerParsedQs<T> {
   [key: string]: undefined | string | string[] | ControllerParsedQs<T> | ControllerParsedQs<T>[] | T;
 }
-
-export interface ControllerHttpRequest<BodyT> {
+*/
+export interface ControllerHttpRequest<BodyT, QueryT, ParamsT> {
   body: BodyT;
   headers: { [key: string]: string };
   ip: string;
   method: string;
-  params: { [key: string]: string };
+  params: ParamsT;
   path: string;
-  query: ControllerParsedQs<BodyT>;
+  query: QueryT;
 }
-export type Controller<BodyT, ResponseT> = (
-  httpRequest: ControllerHttpRequest<BodyT>
-) => Promise<ControllerResponse<ResponseT>>;
+export type Controller<
+  BodyT = any,
+  ResponseT = any,
+  QueryT = { [key: string]: any },
+  ParamsT = { [key: string]: any }
+> = (httpRequest: ControllerHttpRequest<BodyT, QueryT, ParamsT>) => Promise<ControllerResponse<ResponseT>>;

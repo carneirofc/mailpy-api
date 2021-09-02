@@ -37,7 +37,6 @@ export interface MailpyDB {
   deleteGroup: (group: Group) => Promise<boolean>;
 
   deleteEntryById: (id: string) => Promise<boolean>;
-  deleteEntry: (entry: Entry) => Promise<boolean>;
 }
 
 export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
@@ -89,13 +88,44 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
   }
 
   class MailpyDBImpl implements MailpyDB {
-    deleteEntryById: (id: string) => Promise<boolean>;
-    deleteEntry: (entry: Entry) => Promise<boolean>;
+    async deleteEntryById(id: string): Promise<boolean> {
+      if (id === null || id === undefined) {
+        throw new InvalidPropertyError(`Cannot delete entry with undefined id "${id}"`);
+      }
+      const db = await makeDb();
+      const res = await db.collection<EntryJsonObj>(entries).deleteOne({ _id: new ObjectId(id) });
+      return res.deletedCount === 1;
+    }
+    // deleteEntry: (entry: Entry) => Promise<boolean>;
+
+    async getGroupUsedCount(id: string): Promise<number> {
+      const db = await makeDb();
+      const res = await db
+        .collection(groups)
+        .aggregate([
+          { $match: { _id: new ObjectId(id) } },
+          { $lookup: { from: entries, localField: "name", foreignField: "group", as: "entries_lookup" } },
+          {
+            $project: {
+              count: { $cond: { if: { $isArray: "$entries_lookup" }, then: { $size: "$entries_lookup" }, else: 0 } },
+            },
+          },
+        ])
+        .toArray();
+      return res[0].count;
+    }
 
     async deleteGroupById(id: string): Promise<boolean> {
       if (id === null || id === undefined) {
         throw new InvalidPropertyError(`Cannot delete group with undefined id "${id}"`);
       }
+
+      const count = await this.getGroupUsedCount(id);
+      if (count !== 0) {
+        console.warn(`Cannot delete group that is being used. Use count ${count}`);
+        return false;
+      }
+
       const db = await makeDb();
       const res = await db.collection<GroupJsonObj>(groups).deleteOne({ _id: new ObjectId(id) });
       return res.deletedCount === 1;
@@ -246,22 +276,10 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
       const result = await db
         .collection(entries)
         .aggregate([
-          {
-            $lookup: {
-              from: "groups",
-              localField: "group",
-              foreignField: "name",
-              as: "group_lookup",
-            },
-          },
-          {
-            $lookup: {
-              from: "conditions",
-              localField: "condition",
-              foreignField: "name",
-              as: "condition_lookup",
-            },
-          },
+          { $lookup: { from: "groups", localField: "group", foreignField: "name", as: "group_lookup" } },
+          { $unwind: { path: "$group_lookup", preserveNullAndEmptyArrays: true } },
+          { $lookup: { from: conditions, localField: "condition", foreignField: "name", as: "condition_lookup" } },
+          { $unwind: { path: "$condition_lookup", preserveNullAndEmptyArrays: true } },
         ])
         .toArray();
       return result.map((entryJson) => parseEntry(entryJson));

@@ -4,7 +4,7 @@ import { Controller, ControllerHttpRequest } from "../controller/comm-types";
 /** Interface Express passing a custom http request to the injected controller */
 export default function makeExpressCallback(controller: Controller<any, any>): RequestHandler {
   return (req, res) => {
-    const httpRequest: ControllerHttpRequest<any> = {
+    const httpRequest: ControllerHttpRequest<any, any, any> = {
       body: req.body,
       query: req.query,
       params: req.params,

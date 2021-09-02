@@ -49,7 +49,8 @@ export function makeListGroups({ mailpyDb }: { mailpyDb: MailpyDB }) {
 }
 
 export function makeDeleteGroup({ mailpyDb }: { mailpyDb: MailpyDB }) {
-  return async function (): Promise<boolean> {
-    throw new Error("Not Impplemented");
+  return async function (id: string): Promise<boolean> {
+    const response = await mailpyDb.deleteGroupById(id);
+    return response;
   };
 }

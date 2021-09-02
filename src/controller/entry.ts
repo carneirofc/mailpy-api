@@ -4,17 +4,23 @@ import { DeleteEntryUseCase } from "../use-cases/entry";
 import { Entry } from "../entities";
 import { UpdateEntry, UpdateEntryUseCase } from "../use-cases/entry";
 
+export type EntriesGetInterface = Controller<any, Entry[]>;
+export type EntryDeleteInterface = Controller<string, boolean>;
+export type EntryGetInterface = Controller<any, Entry, { id: string }>;
+export type EntryPatchInterface = Controller<UpdateEntry, Entry>;
+export type EntryPostInterface = Controller<AddEntry, Entry>;
+
 export function makeGetEntry({
   listEntry: listEntry,
 }: {
   listEntry: (id: string) => Promise<Entry>;
-}): Controller<{ id: string }, Entry> {
+}): EntryGetInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
     };
     try {
-      const entry = await listEntry((httpRequest.query as { id: string }).id);
+      const entry = await listEntry(httpRequest.query.id);
       return {
         headers,
         statusCode: 200,
@@ -33,7 +39,7 @@ export function makeGetEntry({
   };
 }
 
-export function makeGetEntries({ listEntries }: { listEntries: () => Promise<Entry[]> }): Controller<any, Entry[]> {
+export function makeGetEntries({ listEntries }: { listEntries: () => Promise<Entry[]> }): EntriesGetInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -58,7 +64,7 @@ export function makeGetEntries({ listEntries }: { listEntries: () => Promise<Ent
   };
 }
 
-export function makeDeleteEntry({ deleteEntry }: { deleteEntry: DeleteEntryUseCase }): Controller<string, boolean> {
+export function makeDeleteEntry({ deleteEntry }: { deleteEntry: DeleteEntryUseCase }): EntryDeleteInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -83,7 +89,7 @@ export function makeDeleteEntry({ deleteEntry }: { deleteEntry: DeleteEntryUseCa
   };
 }
 
-export function makePostEntry({ addEntry }: { addEntry: AddEntryUseCase }): Controller<AddEntry, Entry> {
+export function makePostEntry({ addEntry }: { addEntry: AddEntryUseCase }): EntryPostInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -110,7 +116,7 @@ export function makePostEntry({ addEntry }: { addEntry: AddEntryUseCase }): Cont
   };
 }
 
-export function makeUpdateEntry({ updateEntry }: { updateEntry: UpdateEntryUseCase }): Controller<UpdateEntry, Entry> {
+export function makeUpdateEntry({ updateEntry }: { updateEntry: UpdateEntryUseCase }): EntryPatchInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",

@@ -7,7 +7,13 @@ import {
 import { Group } from "../entities";
 import { Controller } from "./comm-types";
 
-export function makePostGroup({ addGroup }: { addGroup: AddGroupUseCase }): Controller<AddGroupUseCaseParams, Group> {
+export type GroupPostInterface = Controller<AddGroupUseCaseParams, Group>;
+export type GroupPatchInterface = Controller<UpdateGroupUseCaseParams, Group>;
+export type GroupGetInterface = Controller<any, Group, { id: string }>;
+export type GroupDeleteInterface = Controller<{ id: string }, { status: boolean; msg?: string }>;
+export type GroupsGetInterface = Controller<any, Group[]>;
+
+export function makePostGroup({ addGroup }: { addGroup: AddGroupUseCase }): GroupPostInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -34,11 +40,7 @@ export function makePostGroup({ addGroup }: { addGroup: AddGroupUseCase }): Cont
   };
 }
 
-export function makeUpdateGroup({
-  updateGroup,
-}: {
-  updateGroup: UpdateGroupUseCase;
-}): Controller<UpdateGroupUseCaseParams, Group> {
+export function makeUpdateGroup({ updateGroup }: { updateGroup: UpdateGroupUseCase }): GroupPatchInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -65,7 +67,7 @@ export function makeUpdateGroup({
   };
 }
 
-export function makeGetGroup({ getGroup }: { getGroup: (id: string) => Promise<Group> }): Controller<any, Group> {
+export function makeGetGroup({ getGroup }: { getGroup: (id: string) => Promise<Group> }): GroupGetInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -93,17 +95,25 @@ export function makeDeleteGroup({
   deleteGroup,
 }: {
   deleteGroup: (id: string) => Promise<boolean>;
-}): Controller<any, boolean> {
+}): GroupDeleteInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
     };
     try {
-      const group = await deleteGroup(httpRequest.body.id);
+      const deleted = await deleteGroup(httpRequest.body.id);
+      if (!deleted) {
+        return {
+          headers,
+          statusCode: 409, // Conflict
+          body: { status: deleted, msg: `Cannot delete group "${httpRequest.body.id}", check if it is being used` },
+        };
+      }
+
       return {
         headers,
         statusCode: 200,
-        body: group,
+        body: { status: deleted },
       };
     } catch (e) {
       console.error(`Failed to get groups ${e}`, e);
@@ -118,7 +128,7 @@ export function makeDeleteGroup({
   };
 }
 
-export function makeGetGroups({ listGroups }: { listGroups: () => Promise<any> }): Controller<any, Group[]> {
+export function makeGetGroups({ listGroups }: { listGroups: () => Promise<any> }): GroupsGetInterface {
   return async (httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
