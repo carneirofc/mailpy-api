@@ -3,7 +3,7 @@ import * as useCases from "../use-cases";
 
 import * as entryController from "./entry";
 import * as groupController from "./group";
-import makeGetConditions from "./get-conditions";
+import makeGetConditions from "./condition";
 import makeGetUser from "./get-user-login";
 
 export const postEntry = entryController.makePostEntry({ addEntry: useCases.addEntry });

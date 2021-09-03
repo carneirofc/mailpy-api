@@ -6,7 +6,7 @@ const makeGetConditions = ({
 }: {
   listConditions: () => Promise<Condition[]>;
 }): Controller<any, Condition[]> => {
-  return async (httpRequest) => {
+  return async (_httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
     };
