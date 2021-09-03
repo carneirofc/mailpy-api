@@ -1,11 +1,11 @@
 import { Controller } from "./comm-types";
 import { Condition } from "../entities";
 
-const makeGetConditions = ({
+export function makeGetConditions({
   listConditions,
 }: {
   listConditions: () => Promise<Condition[]>;
-}): Controller<any, Condition[]> => {
+}): Controller<any, Condition[]> {
   return async (_httpRequest) => {
     const headers = {
       "Content-Type": "application/json",
@@ -28,5 +28,4 @@ const makeGetConditions = ({
       };
     }
   };
-};
-export default makeGetConditions;
+}

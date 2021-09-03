@@ -5,7 +5,7 @@ import { Entry } from "../entities";
 import { UpdateEntry, UpdateEntryUseCase } from "../use-cases/entry";
 
 export type EntriesGetInterface = Controller<any, Entry[]>;
-export type EntryDeleteInterface = Controller<string, boolean>;
+export type EntryDeleteInterface = Controller<{ id: string }, boolean>;
 export type EntryGetInterface = Controller<any, Entry, { id: string }>;
 export type EntryPatchInterface = Controller<UpdateEntry, Entry>;
 export type EntryPostInterface = Controller<AddEntry, Entry>;
@@ -70,7 +70,7 @@ export function makeDeleteEntry({ deleteEntry }: { deleteEntry: DeleteEntryUseCa
       "Content-Type": "application/json",
     };
     try {
-      const res = await deleteEntry(httpRequest.body);
+      const res = await deleteEntry(httpRequest.body.id);
       return {
         headers,
         statusCode: 200,

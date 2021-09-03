@@ -1,13 +1,13 @@
 import { mailpyDb, usersDb } from "../data-access";
 
-import makeListConditions from "./list-conditions";
+import * as conditionUseCase from "./condition";
 import * as groupUseCase from "./group";
 import * as entryUseCase from "./entry";
 import makeUserLogin from "./login-user";
 
 import { getAzureUserInfo as getExternalUserInfo } from "../helpers/azure";
 
-export const listConditions = makeListConditions({ mailpyDb });
+export const listConditions = conditionUseCase.makeListConditions({ mailpyDb });
 
 export const listGroups = groupUseCase.makeListGroups({ mailpyDb });
 export const getGroup = groupUseCase.makeGetGroup({ mailpyDb });

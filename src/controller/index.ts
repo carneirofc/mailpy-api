@@ -3,7 +3,7 @@ import * as useCases from "../use-cases";
 
 import * as entryController from "./entry";
 import * as groupController from "./group";
-import makeGetConditions from "./condition";
+import * as conditionController from "./condition";
 import makeGetUser from "./get-user-login";
 
 export const postEntry = entryController.makePostEntry({ addEntry: useCases.addEntry });
@@ -18,6 +18,6 @@ export const getGroup = groupController.makeGetGroup({ getGroup: useCases.getGro
 export const updateGroup = groupController.makeUpdateGroup({ updateGroup: useCases.updateGroup });
 export const deleteGroup = groupController.makeDeleteGroup({ deleteGroup: useCases.deleteGroup });
 
-export const getConditions = makeGetConditions({ listConditions: useCases.listConditions });
+export const getConditions = conditionController.makeGetConditions({ listConditions: useCases.listConditions });
 
 export const getUserLogin = makeGetUser({ userLogin: useCases.userLogin });
