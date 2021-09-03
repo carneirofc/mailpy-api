@@ -1,7 +1,7 @@
 import faker from "faker";
 
 import makeUsersDb, { UsersDb } from "./users-db";
-import { makeUser, Grant } from "../entities";
+import { makeUser } from "../entities";
 import { DatabaseDuplicatedKeyError } from "../helpers/errors";
 
 import makeDb, { closeDb } from "../../fixtures/db/db";

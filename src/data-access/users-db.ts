@@ -48,16 +48,7 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
       const db = await makeDb();
       const result: RoleJsonObj[] = await db
         .collection(roles)
-        .aggregate([
-          {
-            $lookup: {
-              from: "grants",
-              localField: "grants",
-              foreignField: "_id",
-              as: "grants",
-            },
-          },
-        ])
+        .aggregate([{ $lookup: { from: "grants", localField: "grants", foreignField: "_id", as: "grants" } }])
         .toArray();
       return result.map(parseRole);
     }
@@ -74,22 +65,8 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
         .collection(users)
         .aggregate([
           { $match: { uuid: uuid } },
-          {
-            $lookup: {
-              from: "roles",
-              localField: "roles",
-              foreignField: "_id",
-              as: "roles_lookup",
-            },
-          },
-          {
-            $lookup: {
-              from: "grants",
-              localField: "roles_lookup.grants",
-              foreignField: "_id",
-              as: "grants",
-            },
-          },
+          { $lookup: { from: "roles", localField: "roles", foreignField: "_id", as: "roles_lookup" } },
+          { $lookup: { from: "grants", localField: "roles_lookup.grants", foreignField: "_id", as: "grants" } },
         ])
         .toArray();
 
@@ -138,16 +115,9 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
     async updateUser(user: User): Promise<boolean> {
       const db = await makeDb();
       const rolesId = user.roles.map((role) => new ObjectID(role.id));
-      const result = await db.collection(users).updateOne(
-        { uuid: user.uuid },
-        {
-          $set: {
-            email: user.email,
-            name: user.name,
-            roles: rolesId,
-          },
-        }
-      );
+      const result = await db
+        .collection(users)
+        .updateOne({ uuid: user.uuid }, { $set: { email: user.email, name: user.name, roles: rolesId } });
       return result.result.ok === 1 && result.result.n === 1;
     }
 

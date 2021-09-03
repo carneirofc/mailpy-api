@@ -1,11 +1,11 @@
-import faker, { fake } from "faker";
+import faker from "faker";
 
 import { initApplicationDatabase } from "../../fixtures/db";
 import makeDb, { closeDb } from "../../fixtures/db/db";
-import { conditionsEnum, grantsEnum, defaultRoles } from "../../fixtures/db/authorization";
+import { conditionsEnum } from "../../fixtures/db/authorization";
 
 import makeMailpyDb, { MailpyDB } from "./mailpy-db";
-import { makeCondition, makeGroup, Condition, Group, ConditionName, makeEntry } from "../entities";
+import { makeGroup, ConditionName, makeEntry } from "../entities";
 import { DatabaseDuplicatedKeyError, InvalidPropertyError } from "../helpers/errors";
 
 beforeAll(async () => await initApplicationDatabase({ makeDb }));
