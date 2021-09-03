@@ -1,13 +1,4 @@
-import {
-  Condition,
-  ConditionName,
-  ConditionNameHas,
-  Entry,
-  Group,
-  makeCondition,
-  makeEntry,
-  makeGroup,
-} from "../entities";
+import { Condition, ConditionName, ConditionNameHas, Entry, Group, makeEntry, makeGroup } from "../entities";
 import { collections } from "../../fixtures/db/mailpy-db-setup";
 import { MakeDb } from "./interfaces";
 import { ObjectId } from "mongodb";
@@ -96,7 +87,6 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
       const res = await db.collection<EntryJsonObj>(entries).deleteOne({ _id: new ObjectId(id) });
       return res.deletedCount === 1;
     }
-    // deleteEntry: (entry: Entry) => Promise<boolean>;
 
     async getGroupUsedCount(id: string): Promise<number> {
       const db = await makeDb();
@@ -112,7 +102,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
           },
         ])
         .toArray();
-      return res[0].count;
+      return res[0]?.count;
     }
 
     async deleteGroupById(id: string): Promise<boolean> {
@@ -161,17 +151,12 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
 
       const db = await makeDb();
       const { id, group, condition, emails, ...data } = entry;
-      const res = await db.collection<EntryJsonObj>(entries).updateOne(
-        { _id: new ObjectId(entry.id) },
-        {
-          $set: {
-            ...data,
-            emails: emails.join(";"),
-            condition: condition.name,
-            group: group.name,
-          },
-        }
-      );
+      const res = await db
+        .collection<EntryJsonObj>(entries)
+        .updateOne(
+          { _id: new ObjectId(entry.id) },
+          { $set: { ...data, emails: emails.join(";"), condition: condition.name, group: group.name } }
+        );
       if (res.result.nModified !== 1) {
         throw new DatabaseError(`Failure on group update "${group}"`);
       }
