@@ -49,7 +49,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
     condition_lookup?: ConditionJsonObj;
     email_timeout: number;
     emails: string;
-    group: string;
+    group: ObjectId;
     group_lookup?: GroupJsonObj;
     pvname: string;
     subject: string;
@@ -148,6 +148,9 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
       if (entry.id === undefined || entry.id === null) {
         throw new InvalidPropertyError(`Failed to update entry, id cannot be empty`);
       }
+      if (!entry.group) {
+        throw new InvalidPropertyError(`Failed to update entry ${entry.id}, group is required `);
+      }
 
       const db = await makeDb();
       const { id, group, condition, emails, ...data } = entry;
@@ -155,7 +158,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         .collection<EntryJsonObj>(entries)
         .updateOne(
           { _id: new ObjectId(entry.id) },
-          { $set: { ...data, emails: emails.join(";"), condition: condition.name, group: group.name } }
+          { $set: { ...data, emails: emails.join(";"), condition: condition.name, group: new ObjectId(group.id) } }
         );
       if (res.result.nModified !== 1) {
         throw new DatabaseError(`Failure on group update "${group}"`);
@@ -180,7 +183,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         subject: entry.subject,
         unit: entry.unit,
         condition: entry.condition.name,
-        group: entry.group.name,
+        group: new ObjectId(entry.group.id),
       });
       const entryResult = res.ops[0];
       const newEntry = deepCopy(entry);

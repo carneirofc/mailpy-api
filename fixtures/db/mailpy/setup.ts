@@ -79,7 +79,7 @@ async function createEntries(db: Db) {
           condition: { bsonType: "string" },
           email_timeout: { bsonType: "int" },
           emails: { bsonType: "string" },
-          group: { bsonType: "string" },
+          group: { bsonType: "objectId" },
           pvname: { bsonType: "string" },
           subject: { bsonType: "string" },
           unit: { bsonType: "string" },
