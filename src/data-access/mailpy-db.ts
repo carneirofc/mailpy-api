@@ -94,7 +94,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         .collection(groups)
         .aggregate([
           { $match: { _id: new ObjectId(id) } },
-          { $lookup: { from: entries, localField: "name", foreignField: "group", as: "entries_lookup" } },
+          { $lookup: { from: entries, localField: "_id", foreignField: "group", as: "entries_lookup" } },
           {
             $project: {
               count: { $cond: { if: { $isArray: "$entries_lookup" }, then: { $size: "$entries_lookup" }, else: 0 } },
