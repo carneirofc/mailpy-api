@@ -111,7 +111,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
       }
 
       const count = await this.getGroupUsedCount(id);
-      if (count !== 0) {
+      if (count !== undefined && count !== 0) {
         console.warn(`Cannot delete group that is being used. Use count ${count}`);
         return false;
       }
@@ -231,7 +231,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
           { $match: { _id: new ObjectId(id) } },
           { $lookup: { from: conditions, localField: "condition", foreignField: "name", as: "condition_lookup" } },
           { $unwind: { path: "$condition_lookup", preserveNullAndEmptyArrays: true } },
-          { $lookup: { from: groups, localField: "group", foreignField: "name", as: "group_lookup" } },
+          { $lookup: { from: groups, localField: "group", foreignField: "_id", as: "group_lookup" } },
           { $unwind: { path: "$group_lookup", preserveNullAndEmptyArrays: true } },
         ])
         .toArray();
@@ -264,7 +264,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
       const result = await db
         .collection(entries)
         .aggregate([
-          { $lookup: { from: "groups", localField: "group", foreignField: "name", as: "group_lookup" } },
+          { $lookup: { from: "groups", localField: "group", foreignField: "_id", as: "group_lookup" } },
           { $unwind: { path: "$group_lookup", preserveNullAndEmptyArrays: true } },
           { $lookup: { from: conditions, localField: "condition", foreignField: "name", as: "condition_lookup" } },
           { $unwind: { path: "$condition_lookup", preserveNullAndEmptyArrays: true } },

@@ -123,7 +123,12 @@ export default function makeUsersDb({ makeDb }: { makeDb: MakeDb }) {
 
     async insertUser(user: User): Promise<User> {
       const db = await makeDb();
-      const rolesId = user.roles.map((role) => new ObjectID(role.id));
+      if (user.roles === undefined) {
+        user.roles = [];
+      }
+      const rolesId = user.roles.map((role) => {
+        new ObjectID(role.id);
+      });
       const result = await db
         .collection(users)
         .insertOne({
