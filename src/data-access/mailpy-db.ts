@@ -1,7 +1,7 @@
-import { Condition, ConditionName, ConditionNameHas, Entry, Group, makeEntry, makeGroup } from "../entities";
+import { Condition, ConditionName, ConditionNameHas, Entry, Event, Group, makeEntry, makeGroup } from "../entities";
 import { collections } from "../../fixtures/db/mailpy-db-setup";
 import { MakeDb } from "./interfaces";
-import { ObjectId } from "mongodb";
+import { ObjectId, Timestamp } from "mongodb";
 import { DatabaseDuplicatedKeyError, DatabaseError, InvalidPropertyError } from "../helpers/errors";
 import { deepCopy } from "../helpers/deep-copy";
 import { CodeDuplicatedKey } from "./error-codes";
@@ -12,6 +12,7 @@ export interface MailpyDB {
   findAllConditions: () => Promise<Condition[]>;
   findAllEntries: () => Promise<Entry[]>;
   findAllGroups: () => Promise<Group[]>;
+  findAllEvents: () => Promise<Event[]>;
 
   findConditionById: (id: string) => Promise<Condition>;
   findConditionByName: (name: string) => Promise<Condition>;
@@ -37,11 +38,13 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
     desc: string;
     enabled: boolean;
   };
+
   type ConditionJsonObj = {
     _id: ObjectId;
     name: ConditionName;
     desc: string;
   };
+
   type EntryJsonObj = {
     _id: ObjectId;
     alarm_values: string;
@@ -49,13 +52,24 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
     condition_lookup?: ConditionJsonObj;
     email_timeout: number;
     emails: string;
-    group: ObjectId;
+    group?: string;
+    group_id: ObjectId;
     group_lookup?: GroupJsonObj;
     pvname: string;
     subject: string;
     unit: string;
     warning_message: string;
   };
+
+  type EventJsonObj = {
+    type: number;
+    ts: Timestamp;
+    _id: ObjectId;
+  };
+
+  function parseEvent({ _id, ts, type, ...data }: EventJsonObj): Event {
+    return { id: _id.toHexString(), ts: new Date(ts.getHighBits() * 1000), type, data };
+  }
 
   function parseGroup({ _id, name, desc, enabled }: GroupJsonObj): Group {
     return makeGroup({ id: _id.toHexString(), desc: desc ? desc : `Group ${name}`, name, enabled });
@@ -161,7 +175,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         .collection<EntryJsonObj>(entries)
         .updateOne(
           { _id: new ObjectId(entry.id) },
-          { $set: { ...data, emails: emails.join(";"), condition: condition.name, group: new ObjectId(group.id) } }
+          { $set: { ...data, emails: emails.join(";"), condition: condition.name, group_id: new ObjectId(group.id) } }
         );
       if (res.result.nModified !== 1) {
         throw new DatabaseError(`Failure on group update "${group}"`);
@@ -186,7 +200,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         subject: entry.subject,
         unit: entry.unit,
         condition: entry.condition.name,
-        group: new ObjectId(entry.group.id),
+        group_id: new ObjectId(entry.group.id),
       });
       const entryResult = res.ops[0];
       const newEntry = deepCopy(entry);
@@ -234,7 +248,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
           { $match: { _id: new ObjectId(id) } },
           { $lookup: { from: conditions, localField: "condition", foreignField: "name", as: "condition_lookup" } },
           { $unwind: { path: "$condition_lookup", preserveNullAndEmptyArrays: true } },
-          { $lookup: { from: groups, localField: "group", foreignField: "_id", as: "group_lookup" } },
+          { $lookup: { from: groups, localField: "group_id", foreignField: "_id", as: "group_lookup" } },
           { $unwind: { path: "$group_lookup", preserveNullAndEmptyArrays: true } },
         ])
         .toArray();
@@ -242,6 +256,12 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         return null;
       }
       return parseEntry(res[0]);
+    }
+
+    async findAllEvents(): Promise<Event[]> {
+      const db = await makeDb();
+      const res = await db.collection<EventJsonObj>("events").find({}).toArray();
+      return res.map((e) => parseEvent(e));
     }
 
     async findGroupById(id: string): Promise<Group> {
