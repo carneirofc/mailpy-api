@@ -1,12 +1,11 @@
 import dotenv from "dotenv";
+dotenv.config();
+
 import http from "http";
 import https from "https";
 import fs from "fs";
-
 import app from "./app";
 import config from "./config";
-
-dotenv.config();
 
 try {
   const credentials = {

@@ -7,7 +7,7 @@ import makeUsersDb from "./users-db";
 const uri = config.MONGODB_URI;
 const options = config.options;
 
-console.info("Creating Mongodb client...");
+console.info("Opening database connection...", uri, options);
 const client = new MongoClient(uri, options);
 
 export const makeDb = async () => {

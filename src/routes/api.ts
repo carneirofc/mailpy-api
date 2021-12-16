@@ -58,6 +58,7 @@ pushRoute(
   passport.authenticate("oauth-bearer", { session: false }),
   makeCallback(controllers.getUserLogin)
 );
+
 pushRoute("get", API_ROOT, (req: Request, res: Response) =>
   res.json({
     _href: routesList,

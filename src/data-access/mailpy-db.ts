@@ -58,7 +58,7 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
   };
 
   function parseGroup({ _id, name, desc, enabled }: GroupJsonObj): Group {
-    return makeGroup({ id: _id.toHexString(), desc, name, enabled });
+    return makeGroup({ id: _id.toHexString(), desc: desc ? desc : `Group ${name}`, name, enabled });
   }
 
   function parseCondition({ _id, name, desc }: ConditionJsonObj): Condition {
@@ -69,6 +69,8 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
   }
 
   function parseEntry({ _id, condition, group, condition_lookup, emails, group_lookup, ...data }: EntryJsonObj): Entry {
+    console.log({ _id, condition, group, condition_lookup, emails, group_lookup, ...data });
+
     return makeEntry({
       id: _id.toHexString(),
       emails: emails.split(";"),
@@ -94,7 +96,8 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
         .collection(groups)
         .aggregate([
           { $match: { _id: new ObjectId(id) } },
-          { $lookup: { from: entries, localField: "_id", foreignField: "group", as: "entries_lookup" } },
+          /* due to compatibility reasons, the field group_id and group may be present in a document */
+          { $lookup: { from: entries, localField: "_id", foreignField: "group_id", as: "entries_lookup" } },
           {
             $project: {
               count: { $cond: { if: { $isArray: "$entries_lookup" }, then: { $size: "$entries_lookup" }, else: 0 } },
@@ -264,7 +267,8 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
       const result = await db
         .collection(entries)
         .aggregate([
-          { $lookup: { from: "groups", localField: "group", foreignField: "_id", as: "group_lookup" } },
+          /* due to compatibility reasons, the field group_id and group may be present in a document */
+          { $lookup: { from: "groups", localField: "group_id", foreignField: "_id", as: "group_lookup" } },
           { $unwind: { path: "$group_lookup", preserveNullAndEmptyArrays: true } },
           { $lookup: { from: conditions, localField: "condition", foreignField: "name", as: "condition_lookup" } },
           { $unwind: { path: "$condition_lookup", preserveNullAndEmptyArrays: true } },
