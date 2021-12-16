@@ -2,7 +2,7 @@ const configAzure = {
   audience: "3ab086b7-33bf-4f5e-8c30-72fbdbc12c25",
   authority: "login.microsoftonline.com",
   clientID: "3ab086b7-33bf-4f5e-8c30-72fbdbc12c25",
-  clientSecret: ***REMOVED***,
+  clientSecret: null, // client secret from Azure
   discovery: ".well-known/openid-configuration",
   loggingLevel: "info",
   loggingNoPII: true,
