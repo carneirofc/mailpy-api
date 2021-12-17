@@ -63,12 +63,12 @@ export default function makeMailpyDb({ makeDb }: { makeDb: MakeDb }): MailpyDB {
 
   type EventJsonObj = {
     type: number;
-    ts: Timestamp;
+    ts: string;
     _id: ObjectId;
   };
 
   function parseEvent({ _id, ts, type, ...data }: EventJsonObj): Event {
-    return { id: _id.toHexString(), ts: new Date(ts.getHighBits() * 1000), type, data };
+    return { id: _id.toHexString(), ts: new Date(ts), type, data };
   }
 
   function parseGroup({ _id, name, desc, enabled }: GroupJsonObj): Group {

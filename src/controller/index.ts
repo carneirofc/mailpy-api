@@ -5,6 +5,7 @@ import * as entryController from "./entry";
 import * as groupController from "./group";
 import * as conditionController from "./condition";
 import makeGetUser from "./get-user-login";
+import { Controller } from "./comm-types";
 
 export const postEntry = entryController.makePostEntry({ addEntry: useCases.addEntry });
 export const getEntries = entryController.makeGetEntries({ listEntries: useCases.listEntries });
@@ -21,3 +22,29 @@ export const deleteGroup = groupController.makeDeleteGroup({ deleteGroup: useCas
 export const getConditions = conditionController.makeGetConditions({ listConditions: useCases.listConditions });
 
 export const getUserLogin = makeGetUser({ userLogin: useCases.userLogin });
+
+function makeGetEvents() {
+  return async function () {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    try {
+      const res = await useCases.listEvents();
+      return {
+        headers,
+        statusCode: 200,
+        body: res,
+      };
+    } catch (e) {
+      console.error(`Failed to update group ${e}`, e);
+      return {
+        headers,
+        statusCode: 400,
+        body: {
+          error: e.message,
+        },
+      };
+    }
+  };
+}
+export const getEvents = makeGetEvents();

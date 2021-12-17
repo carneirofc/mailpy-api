@@ -39,6 +39,8 @@ const pushRoute = (method: Method, href: string, ...args: any) => {
   routesList.push({ method, href });
 };
 
+pushRoute("get", `${API_ROOT}/events`, makeCallback(controllers.getEvents));
+
 pushRoute("delete", `${API_ROOT}/entry`, makeCallback(controllers.deleteEntry));
 pushRoute("get", `${API_ROOT}/entries`, makeCallback(controllers.getEntries));
 pushRoute("get", `${API_ROOT}/entry`, makeCallback(controllers.getEntry));

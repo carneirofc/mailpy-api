@@ -26,3 +26,11 @@ export const userLogin = makeUserLogin({
   usersDb,
   getExternalUserInfo,
 });
+
+import { MailpyDB } from "../data-access/mailpy-db";
+export function makeListEvents({ mailpyDb }: { mailpyDb: MailpyDB }) {
+  return async function () {
+    return await mailpyDb.findAllEvents();
+  };
+}
+export const listEvents = makeListEvents({ mailpyDb });
